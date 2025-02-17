@@ -23,7 +23,11 @@ sudo chown -R $USER:$USER /var/www/prestonjackson.com
 cd /var/www/prestonjackson.com
 git clone https://github.com/prestonjackson/site.git
 sudo cp site/config/sites-enabled/prestonjackson.com.conf /etc/apache2/sites-enabled/prestonjackson.com.conf
-sudo cp site/conf-enabled/serve-cgi-bin.conf /etc/apache2/conf-enabled/serve-cgi-bin.conf
+# Enable CGI support in Apache2
+sudo cp site/config/apache2/conf-enabled/serve-cgi-bin.conf /etc/apache2/conf-enabled/serve-cgi-bin.conf
+# Enable UTF-8 support in Apache2
+sudo cp site/config/apache2/conf-enabled/charset.conf /etc/apache2/conf-enabled/charset.conf
+
 
 # Enable the site and disable the default site
 sudo a2ensite prestonjackson.com.conf

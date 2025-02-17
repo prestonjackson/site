@@ -36,9 +36,13 @@ header {
   align-items: center;
   justify-content: center;
   text-align: center;
-  font-size: 5rem;
+  font-size: 2rem;
   font-weight: 800;
   color: #7d8991;
+}
+
+#surface {
+  border: #000000 solid 1px;
 }
 
 footer {
