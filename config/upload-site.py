@@ -1,1 +1,0 @@
-# gcloud storage cp ~/Desktop/index.html gs://prestonjackson-site/index.html
