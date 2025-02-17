@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+import os
+import sys
+
+print("Content-Type: text/html\n")
+print("<html><body>")
+
+print("<h1>Request Data</h1>")
+
+# Printing environment variables
+print("--Headers--")
+for key, value in os.environ.items():
+  print(f"{key}: {value}<br/>")
+
+# Printing stdin
+print("--Body--")
+body = sys.stdin.read()
+print(body)
+
+print("</body></html>")
+
+
