@@ -37,6 +37,9 @@ class Application {
   run() {
     console.log("Application run");
 
+    // Create the signaler object
+    this.signaler = new Signaler("https://api.prestonjackson.com/api/echo");
+
     // Set handlers for the buttons.
     this.offerButton = document.getElementById("offer-button");
     this.answerButton = document.getElementById("answer-button");
@@ -73,7 +76,8 @@ class Application {
     this.localConnection.createOffer()
       .then((offer) => {
         this.localConnection.setLocalDescription(offer);
-        this.offer = offer;
+        this.signaler.postMessage({"offer": offer});
+        //this.offer = offer;
       })
       .catch(this.onCreateDescriptionError);
   }
@@ -89,15 +93,24 @@ class Application {
       }
     })
 
-    if (this.offer) {
-      this.remoteConnection.setRemoteDescription(this.offer)
-        .then(() => this.remoteConnection.createAnswer())
-        .then((answer) => {
-          this.remoteConnection.setLocalDescription(answer);
-          this.answer = answer;
-        })
-        .catch(this.onCreateDescriptionError);
-    }
+    // Get the offer from the signaler
+    var offer = null;
+    this.signaler.getMessage()
+      .then((json) => {
+        offer = json["offer"];
+        if (this.offer) {
+          this.remoteConnection.setRemoteDescription(this.offer)
+            .then(() => this.remoteConnection.createAnswer())
+            .then((answer) => {
+              this.remoteConnection.setLocalDescription(answer);
+              this.answer = answer;
+            })
+            .catch(this.onCreateDescriptionError);
+        }
+      })
+      .catch((error) => {
+        console.error(error.message);
+      });
   }
 
   onConnect = () => {
@@ -230,15 +243,49 @@ class Application {
 }
 
 class Signaler {
-  constructor() {
-    console.log("Signaler constructor");
+  constructor(url) {
+    this.url = url;
   }
 
-  sendMessage() {
-    console.log("Signaler sendMessage");
+  async postMessage(data) {
+    try {
+      const response = await fetch(this.url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+      
+      // Check if the response status is OK
+      if (!response.ok) {
+        throw new Error('Response status: ${response.status}');
+      }  
+    } catch (error) {
+      console.error(error.message);
+    }
   }
 
-  onReceiveMessage() {
-    console.log("Signaler onReceiveMessage");
+  async getMessage() {
+    try {
+      const response = await fetch(this.url, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      
+      // Check if the response status is OK
+      if (!response.ok) {
+        throw new Error('Response status: ${response.status}');
+      }
+    
+      // Parse the response body as JSON
+      const json = await response.json();
+      console.log(json);
+      return json;
+    } catch (error) {
+      console.error(error.message);
+    }
   }
 }
