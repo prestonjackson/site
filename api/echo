@@ -1,0 +1,71 @@
+#!/usr/bin/env python3
+
+import io
+import logging
+import os
+import sys
+
+log = logging.getLogger(__name__)
+
+
+def handleOptions(buffer):
+  print("Status: 204 No Content", file=buffer)
+  if "HTTP_ORIGIN" in os.environ:
+    print(f"Access-Control-Allow-Origin: {os.environ['HTTP_ORIGIN']}", file=buffer)
+  if "HTTP_ACCESS_CONTROL_REQUEST_HEADERS" in os.environ:
+    print(f"Access-Control-Allow-Headers: {os.environ['HTTP_ACCESS_CONTROL_REQUEST_HEADERS']}", file=buffer)
+  if "HTTP_ACCESS_CONTROL_REQUEST_METHOD" in os.environ:
+    print(f"Access-Control-Allow-Methods: {os.environ['HTTP_ACCESS_CONTROL_REQUEST_METHOD']}", file=buffer)
+
+
+def handlePost(buffer):
+  print("Status: 200 OK", file=buffer)
+  print("Content-Type: text/html\r\n\r\n", file=buffer)
+
+  print("<html><body><pre><code>", file=buffer)
+  print("Hello World!", file=buffer)
+  print("</code></pre></body></html>", file=buffer)
+
+  # Printing stdin
+  #body = sys.stdin.read()
+
+
+def handleTrace(buffer):
+  method = os.environ["REQUEST_METHOD"]
+  protocol = os.environ["SERVER_PROTOCOL"]
+  uri = os.environ["REQUEST_URI"]
+
+  print("Status: 200 OK", file=buffer)
+  print("Content-Type: message/http\n", file=buffer)
+  print(f"{method} {uri} {protocol}" , file=buffer)
+
+  for key, value in sorted(os.environ.items()):
+    if key.startswith("HTTP_"):
+      # Strip off HTTP_, convert to standard HTTP header names
+      header_name = key[5:].lower().title().replace('_', '-')
+      print(f"{header_name}: {value}", file=buffer)
+
+
+def main():
+  logging.basicConfig(filename="/tmp/api.log", level=logging.INFO)
+  buffer = io.StringIO()
+
+  method = os.environ["REQUEST_METHOD"] 
+  if method == "OPTIONS": 
+    handleOptions(buffer)
+  elif method == "TRACE":
+    handleTrace(buffer)
+  elif method == "POST":
+    handlePost(buffer)
+
+  content = buffer.getvalue()
+  buffer.close()
+
+  print(content)
+  log.info(content)
+
+
+if __name__ == '__main__':
+  print("Hello Echo!", file=sys.stderr) 
+  main()
+
