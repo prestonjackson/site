@@ -16,13 +16,14 @@ sudo apt-get install git
 # Enable required modules in Apache2
 sudo a2enmod ssl
 sudo a2enmod cgi
+sudo s2enmod rewrite
 
 # Download the website from github.com
 sudo mkdir -p /var/www/prestonjackson.com
 sudo chown -R $USER:$USER /var/www/prestonjackson.com
 cd /var/www/prestonjackson.com
 git clone https://github.com/prestonjackson/site.git
-sudo cp site/config/sites-enabled/prestonjackson.com.conf /etc/apache2/sites-enabled/prestonjackson.com.conf
+sudo cp site/config/apache2/sites-available/prestonjackson.com.conf /etc/apache2/sites-available/prestonjackson.com.conf
 # Enable CGI support in Apache2
 sudo cp site/config/apache2/conf-enabled/serve-cgi-bin.conf /etc/apache2/conf-enabled/serve-cgi-bin.conf
 # Enable UTF-8 support in Apache2
@@ -40,7 +41,7 @@ sudo systemctl restart apache2
 # Set up the SSL/TLS certificate management with certbot, including refresh cron
 # Ref: https://certbot.eff.org/instructions?ws=apache&os=snap&tab=standard
 # Notes: Creates sites-enabled/prestonjackson.com-le-ssl.conf automatically
-sudo apt-get install snapd  # Yes, a package manager for one package
+sudo apt-get install snapd  # Yes, a package manager for one package:
 sudo snap install core
 sudo snap refresh core
 sudo snap install --classic certbot  # Classic mode lets snap read/write files

@@ -49,25 +49,8 @@ def logRequest(method, uri, protocol, headers, body, env):
 def main():
     logging.basicConfig(filename="/tmp/api.log", level=logging.INFO)
     log.info("==========START==========")   
-    method = os.environ["REQUEST_METHOD"]
-    protocol = os.environ["SERVER_PROTOCOL"]
-    uri = os.environ["REQUEST_URI"]
-    headers = {}
-    env = {}
-    for key, value in os.environ.items():
-        if key in ["REQUEST_METHOD", "SERVER_PROTOCOL", "REQUEST_URI"]:
-            continue
-
-        # Strip off HTTP_, convert to standard HTTP header names
-        elif key.startswith("HTTP_"):
-            header_name = key[5:].lower().title().replace('_', '-')
-            headers[header_name] = value
-         
-        # Collect other env vars
-        else:
-            env[key] =  value
     
-    body = sys.stdin.read()
+    request = Request(os.environ)
     logRequest(method, uri, protocol, headers, body, env)
 
     response = io.StringIO()

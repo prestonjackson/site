@@ -1,8 +1,8 @@
 "use strict";
 
-function main() {
+function main(baseURI) {
   // Create and set the global app object.
-  const app = new Application();
+  const app = new Application(baseURI);
   window.app = app;
 
   // Run the top level application logic.
@@ -10,9 +10,10 @@ function main() {
 }
 
 class Application {
-  constructor() {
+  constructor(baseURI) {
     console.log("Application constructor");
 
+    this.baseURI = baseURI;
     this.offerButton = null;
     this.answerButton = null;
     this.connectButton
@@ -38,7 +39,7 @@ class Application {
     console.log("Application run");
 
     // Create the signaler object
-    this.signaler = new Signaler("https://api.prestonjackson.com/api/echo");
+    this.signaler = new Signaler(this.baseURI + "api/echo");
 
     // Set handlers for the buttons.
     this.offerButton = document.getElementById("offer-button");
