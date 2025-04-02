@@ -52,3 +52,8 @@ sudo certbot --apache
 sudo apache2ctl configtest
 sudo systemctl restart apache2
 
+# Make the data dir
+sudo mkdir -p /var/www/prestonjackson.com/site/data
+sudo chown -R $USER:$USER /var/www/prestonjackson.com/site/data
+
+
