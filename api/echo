@@ -5,6 +5,8 @@ import logging
 import os
 import sys
 
+import gateway
+
 log = logging.getLogger(__name__)
 
 ALLOWED_ORIGINS = "null"
@@ -50,7 +52,7 @@ def main():
     logging.basicConfig(filename="/tmp/api.log", level=logging.INFO)
     log.info("==========START==========")   
     
-    request = Request(os.environ)
+    request = gateway.Request(os.environ)
     logRequest(method, uri, protocol, headers, body, env)
 
     response = io.StringIO()

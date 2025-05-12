@@ -16,7 +16,8 @@ sudo apt-get install git
 # Enable required modules in Apache2
 sudo a2enmod ssl
 sudo a2enmod cgi
-sudo s2enmod rewrite
+sudo a2enmod rewrite
+sudo a2enmod include
 
 # Download the website from github.com
 sudo mkdir -p /var/www/prestonjackson.com
