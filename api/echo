@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import io
+import http
 import logging
 import os
 import sys
@@ -9,67 +9,58 @@ import gateway
 
 log = logging.getLogger(__name__)
 
-ALLOWED_ORIGINS = "null"
-ALLOWED_HEADERS = "Content-Type"
-ALLOWED_METHODS = "OPTIONS, GET, POST"
 
-def handleOptions(headers, body, response):
-    print("Status: 204 No Content", file=response)
-    print(f"Access-Control-Allow-Origin: {ALLOWED_ORIGINS}", file=response)
-    print(f"Access-Control-Allow-Headers: {ALLOWED_HEADERS}", file=response)
-    print(f"Access-Control-Allow-Methods: {ALLOWED_METHODS}", file=response)
+def handle_OPTIONS(request, response):
+    log.info("handle_OPTIONS")
+    ALLOWED_ORIGINS = "null"
+    ALLOWED_HEADERS = "Content-Type"
+    ALLOWED_METHODS = "OPTIONS, GET, POST"
+    
+    response.header("Access-Control-Allow-Origin", f"{ALLOWED_ORIGINS}")
+    response.header("Access-Control-Allow-Headers", f"{ALLOWED_HEADERS}")
+    response.header("Access-Control-Allow-Methods", f"{ALLOWED_METHODS}")
 
-
-def handlePost(headers, body, response):
-    print("Status: 200 OK", file=response)
-    print("Access-Control-Allow-Origin: null", file=response)
-    print("Content-Type: text/html\n", file=response)
-
-    print("<html><body><pre><code>", file=response)
-    print(body, file=response)
-    print("</code></pre></body></html>", file=response)
+    response.set_status(http.HTTPStatus.NO_CONTENT)
 
 
-def handleGet(headers, body, response):
-    print("Status: 200 OK", file=response)
+def handle_POST(request, response):
+    log.info("handle_POST")
+    response.set_status(http.HTTPStatus.OK)
 
 
-def logRequest(method, uri, protocol, headers, body, env):
-    log.info(f"{method} {uri} {protocol}")
-    log.info("-----HEADERS-----")
-    for key, value in headers.items():
-        log.info(f"{key}: {value}")
+def handle_GET(request, response):
+    log.info("handle_GET")
+    response.set_header("Access-Control-Allow-Origin", "null")
+    response.set_header("Content-Type", "text/html")
 
-    log.info("-----ENV------")
-    for key, value in env.items():
-        log.info(f"{key}: {value}")
+    response.append_to_body("<html><body><pre><code>")
+    response.append_to_body(request.body)
+    response.append_to_body("</code></pre></body></html>")
 
-    log.info("-----BODY-----")
-    log.info(body)
+    response.set_status(http.HTTPStatus.OK)
 
 
 def main():
     logging.basicConfig(filename="/tmp/api.log", level=logging.INFO)
-    log.info("==========START==========")   
+    log.info("==========NEW REQUEST==========")   
     
-    request = gateway.Request(os.environ)
-    logRequest(method, uri, protocol, headers, body, env)
+    request = gateway.ApacheRequest(os.environ, sys.stdin.read())
+    log.info(request)
 
-    response = io.StringIO()
+    response = gateway.ApacheResponse()
+    
+    match request.method:
+        case http.HTTPMethod.OPTIONS: 
+            handle_OPTIONS(request, response)
+        case http.HTTPMethod.GET:
+            handle_GET(request, response)
+        case http.HTTPMethod.POST:
+            handle_POST(request, response)
+        case _:
+            log.info(f"Method: {request.method} not found")
 
-    method = os.environ["REQUEST_METHOD"] 
-    if method == "OPTIONS": 
-        handleOptions(headers, body, response)
-    elif method == "GET":
-        handleGet(headers, body, response)
-    elif method == "POST":
-        handlePost(headers, body, response)
-
-    content = response.getvalue()
-    response.close()
-
-    print(content)
-    log.info(content)
+    raw_response = response.flush()
+    log.info(raw_response)
 
 
 if __name__ == '__main__':

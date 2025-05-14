@@ -16,7 +16,7 @@ class Application {
     this.baseURI = baseURI;
     this.offerButton = null;
     this.answerButton = null;
-    this.connectButton
+    this.connectButton = null;
     this.disconnectButton = null;
     this.sendButton = null;
     this.messageInputBox = null;
