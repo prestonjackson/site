@@ -14,6 +14,7 @@ class Application {
     console.log("Application constructor");
 
     this.baseURI = baseURI;
+
     this.offerButton = null;
     this.answerButton = null;
     this.connectButton = null;
@@ -21,6 +22,8 @@ class Application {
     this.sendButton = null;
     this.messageInputBox = null;
     this.receiveBox = null;
+
+    this.id = "abcd";
 
     this.offer = null;
     this.answer = null;
@@ -39,7 +42,7 @@ class Application {
     console.log("Application run");
 
     // Create the signaler object
-    this.signaler = new Signaler(this.baseURI + "api/echo");
+    this.signaler = new Signaler(this.baseURI + "api/signal");
 
     // Set handlers for the buttons.
     this.offerButton = document.getElementById("offer-button");
@@ -77,7 +80,8 @@ class Application {
     this.localConnection.createOffer()
       .then((offer) => {
         this.localConnection.setLocalDescription(offer);
-        this.signaler.postMessage({"offer": offer});
+        this.signaler.postMessage({"id": this.id,
+                                   "offer": offer});
         //this.offer = offer;
       })
       .catch(this.onCreateDescriptionError);
@@ -95,16 +99,18 @@ class Application {
     })
 
     // Get the offer from the signaler
-    var offer = null;
+    //var offer = null;
     this.signaler.getMessage()
       .then((json) => {
-        offer = json["offer"];
-        if (this.offer) {
-          this.remoteConnection.setRemoteDescription(this.offer)
+        var offer = json["offer"];
+        if (offer) {
+          this.remoteConnection.setRemoteDescription(offer)
             .then(() => this.remoteConnection.createAnswer())
             .then((answer) => {
               this.remoteConnection.setLocalDescription(answer);
-              this.answer = answer;
+              this.signaler.postMessage({"id": this.id,
+                                         "answer": answer});
+              //this.answer = answer;
             })
             .catch(this.onCreateDescriptionError);
         }
@@ -115,17 +121,21 @@ class Application {
   }
 
   onConnect = () => {
-    if (this.answer) {
-      this.localConnection.setRemoteDescription(this.answer)
-        .then(() => this.localIceCandidates.forEach((candidate) => {
-          this.remoteConnection.addIceCandidate(candidate)
-            .catch(this.onAddCandidateError);
-        }))
-        .then(() => this.remoteIceCandidates.forEach((candidate) => {
-          this.localConnection.addIceCandidate(candidate)
-            .catch(this.onAddCandidateError);
-        }))
-    }
+   this.signaler.getMessage()
+      .then((json) => {
+        var answer = json["answer"];
+        if (answer) {
+          this.localConnection.setRemoteDescription(answer)
+            .then(() => this.localIceCandidates.forEach((candidate) => {
+              this.remoteConnection.addIceCandidate(candidate)
+                .catch(this.onAddCandidateError);
+            }))
+            .then(() => this.remoteIceCandidates.forEach((candidate) => {
+              this.localConnection.addIceCandidate(candidate)
+                .catch(this.onAddCandidateError);
+            }))
+        }
+      });
   }
       
   // Handle errors attempting to create a description;
