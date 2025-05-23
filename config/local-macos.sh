@@ -14,6 +14,8 @@
 #
 # 255 DocumentRoot "/Library/WebServer/prestonjackson.com/site/doc"
 # 256 <Directory "/Library/WebServer/prestonjackson.com/site/doc">
+# new     Options +Includes
+# new     XBitHack full
 #
 # Comment this out out:
 # 383     #ScriptAliasMatch ^/cgi-bin/((?!(?i:webobjects)).*$) "/Library/WebServer/CGI-Executables/$1"
@@ -27,6 +29,7 @@
 # 403 </Directory>
 #
 # 557 AddDefaultCharset UTF-8
+
 
 
 # Download the website from github.com
