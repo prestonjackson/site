@@ -8,6 +8,8 @@
 # Modify /etc/apache2/httpd.conf
 # Uncomment the following lines:
 #
+# 113 LoadModule include_module libexec/apache2/mod_include.so
+#
 # 174         LoadModule cgi_module libexec/apache2/mod_cgi.so
 #
 # 231 ServerName localhost:80
@@ -24,7 +26,7 @@
 # 399 <Directory "/Library/WebServer/prestonjackson.com/site/api">
 # 400     AllowOverride None
 # 401     Options ExecCGI
-# new     AddHandler cgi-script
+# new     AddHandler cgi-script .py
 # 402     Require all granted
 # 403 </Directory>
 #
