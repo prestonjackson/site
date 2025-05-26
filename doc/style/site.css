@@ -12,7 +12,7 @@ html, body {
   height: 100%;
 
   font-size: 10pt;
-  font-family: serif;
+  font-family: "Georgia", serif;
 }
 
 header {
@@ -39,6 +39,10 @@ header {
 
 #surface {
   border: #000000 solid 1px;
+}
+
+main {
+  margin: 1pc;
 }
 
 footer {

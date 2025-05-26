@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Blog</title>
+<!--#include virtual="/template/head.html" -->
+</head>
+<body>
+  <div id="content">
+<!--#include virtual="/template/header.html" -->
+    <nav>
+      <pre>
+<!--#exec cmd="ls *.md" -->
+      </pre>
+    </nav>
+    <main>
+<!--#exec cmd="cmark-gfm -t html --smart --validate-utf8 -e footnotes -e table -e strikethrough -e tasklist $QUERY_STRING" -->
+    </main>
+<!--#include virtual="/template/footer.html" -->
+  </div>
+</body>
+</html>
