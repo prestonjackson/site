@@ -53,23 +53,23 @@ class Application {
     this.messageInputBox = document.getElementById("message-input-box");
     this.receiveBox = document.getElementById("receive-box");
 
-    this.offerButton.onclick = this.onOffer;
-    this.answerButton.onclick = this.onAnswer;
-    this.connectButton.onclick = this.onConnect;
-    this.disconnectButton.onclick = this.onDisconnectPeers;
-    this.sendButton.onclick = this.onSendMessage;
+    this.offerButton.onclick = () => this.onOffer();
+    this.answerButton.onclick = () => this.onAnswer();
+    this.connectButton.onclick = () => this.onConnect();
+    this.disconnectButton.onclick = () => this.onDisconnectPeers();
+    this.sendButton.onclick = () => this.onSendMessage();
   }
 
-  onOffer = () => {
+  onOffer() {
     // Create the local connection and its event listeners 
     this.localConnection = new RTCPeerConnection();
-      
+    
     // Create the data channel and establish its event listeners
     this.sendChannel = this.localConnection.createDataChannel("sendChannel");
-    this.sendChannel.onopen = this.onSendChannelStatusChange;
-    this.sendChannel.onclose = this.onSendChannelStatusChange;
+    this.sendChannel.onopen = (event) => this.onSendChannelStatusChange(event);
+    this.sendChannel.onclose = (event) => this.onSendChannelStatusChange(event);
 
-    // Set up the ICE candidates for the two peers    
+    // Set up the ICE candidate listener for the local connection peers    
     this.localConnection.onicecandidate = ((event) => {
       if (event.candidate) {
         this.localIceCandidates.push(event.candidate);
@@ -82,16 +82,16 @@ class Application {
         this.localConnection.setLocalDescription(offer);
         this.signaler.postMessage({"id": this.id,
                                    "offer": offer});
-        //this.offer = offer;
       })
-      .catch(this.onCreateDescriptionError);
+      .catch((error) => this.onCreateDescriptionError(error));
   }
 
-  onAnswer = () => {
+  onAnswer() {
     // Create the remote connection and its event listeners    
     this.remoteConnection = new RTCPeerConnection();
-    this.remoteConnection.ondatachannel = this.onReceiveChannelCallback;
+    this.remoteConnection.ondatachannel = (event) => this.onReceiveChannelCallback(event);
 
+    // Set up the ICE candidate listner for the remote connection
     this.remoteConnection.onicecandidate = ((event) => {
       if (event.candidate) {
         this.remoteIceCandidates.push(event.candidate);
@@ -110,9 +110,8 @@ class Application {
               this.remoteConnection.setLocalDescription(answer);
               this.signaler.postMessage({"id": this.id,
                                          "answer": answer});
-              //this.answer = answer;
             })
-            .catch(this.onCreateDescriptionError);
+            .catch((error) => this.onCreateDescriptionError(error));
         }
       })
       .catch((error) => {
@@ -120,19 +119,19 @@ class Application {
       });
   }
 
-  onConnect = () => {
-   this.signaler.getMessage()
+  onConnect() {
+    this.signaler.getMessage()
       .then((json) => {
         var answer = json["answer"];
         if (answer) {
           this.localConnection.setRemoteDescription(answer)
             .then(() => this.localIceCandidates.forEach((candidate) => {
               this.remoteConnection.addIceCandidate(candidate)
-                .catch(this.onAddCandidateError);
+                .catch((error) => this.onAddCandidateError(error));
             }))
             .then(() => this.remoteIceCandidates.forEach((candidate) => {
               this.localConnection.addIceCandidate(candidate)
-                .catch(this.onAddCandidateError);
+                .catch((error) => this.onAddCandidateError(error));
             }))
         }
       });
@@ -142,30 +141,30 @@ class Application {
   // this can happen both when creating an offer and when
   // creating an answer. In this simple example, we handle
   // both the same way.
-  onCreateDescriptionError = (error) => {
+  onCreateDescriptionError(error) {
     console.log("Unable to create an offer: " + error.toString());
   }
   
   // Handle successful addition of the ICE candidate
   // on the "local" end of the connection.
-  onLocalAddCandidateSuccess = () => {
+  onLocalAddCandidateSuccess() {
     this.offerButton.disabled = true;
   }
   
   // Handle successful addition of the ICE candidate
   // on the "remote" end of the connection.
-  onRemoteAddCandidateSuccess = () => {
+  onRemoteAddCandidateSuccess() {
     this.disconnectButton.disabled = false;
   }
   
   // Handle an error that occurs during addition of ICE candidate.
-  onAddCandidateError = () => {
+  onAddCandidateError(error) {
     this.console.log("Oh noes! addICECandidate failed!");
   }
 
   // Handles clicks on the "Send" button by transmitting
   // a message to the remote peer.
-  onSendMessage = () => {
+  onSendMessage() {
     var message = this.messageInputBox.value;
     this.sendChannel.send(message);
     
@@ -178,7 +177,7 @@ class Application {
   // Handle status changes on the local end of the data
   // channel; this is the end doing the sending of data
   // in this example.
-  onSendChannelStatusChange = (event) => {
+  onSendChannelStatusChange(event) {
     if (this.sendChannel) {
       var state = this.sendChannel.readyState;
 
@@ -199,16 +198,16 @@ class Application {
 
   // Called when the connection opens and the data
   // channel is ready to be connected to the remote.
-  onReceiveChannelCallback = (event) => {
+  onReceiveChannelCallback(event) {
     this.receiveChannel = event.channel;
-    this.receiveChannel.onmessage = this.onReceiveMessage;
-    this.receiveChannel.onopen = this.onReceiveChannelStatusChange;
-    this.receiveChannel.onclose = this.onReceiveChannelStatusChange;
+    this.receiveChannel.onmessage = (event) => this.onReceiveMessage(event);
+    this.receiveChannel.onopen = (event) => this.onReceiveChannelStatusChange(event);
+    this.receiveChannel.onclose = (event) => this.onReceiveChannelStatusChange(event);
   }
 
   // Handle onmessage events for the receiving channel.
   // These are the data messages sent by the sending channel.
-  onReceiveMessage = (event) => {
+  onReceiveMessage(event) {
     var element = document.createElement("p");
     var textNode = document.createTextNode(event.data);
     
@@ -217,7 +216,7 @@ class Application {
   }
 
   // Handle status changes on the receiver's channel.
-  onReceiveChannelStatusChange = (event) => {
+  onReceiveChannelStatusChange(event) {
     if (this.receiveChannel) {
       console.log("Receive channel's status has changed to " +
                   this.receiveChannel.readyState);
@@ -228,7 +227,7 @@ class Application {
 
   // Close the connection, including data channels if they're open.
   // Also update the UI to reflect the disconnected status.
-  onDisconnectPeers = () =>{
+  onDisconnectPeers() {
     // Close the RTCDataChannels if they're open.
     this.sendChannel.close();
     this.receiveChannel.close();
