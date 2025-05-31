@@ -44,10 +44,8 @@ def handle_POST(request, response):
                 log.info("could not parse metadata file")
 
     # Update the offer or answer metadata
-    if "offer" in requestdata.keys():
-        metadata["offer"] = requestdata["offer"]
-    elif "answer" in requestdata.keys():
-        metadata["answer"] = requestdata["answer"]
+    for key in requestdata.keys():
+        metadata[key] = requestdata[key]
 
     # Open file for writing with truncation (using "a+" above does not allow overwriting)
     with open(path, "w") as file:
