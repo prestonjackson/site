@@ -42,12 +42,14 @@ class Application {
     this.messageInputBox = document.getElementById("message-input-box");
     this.receiveBox = document.getElementById("receive-box");
 
-    this.offerButton.onclick = () => this.connection.offer();
-    this.answerButton.onclick = () => this.connection.answer();
-    this.connectButton.onclick = () => this.connection.connect();
+    this.offerButton.onclick = () => this.connection.offer(this.id);
+    this.answerButton.onclick = () => this.connection.answer(this.id);
+    this.connectButton.onclick = () => this.connection.connect(this.id);
 
     this.disconnectButton.onclick = () => this.onDisconnect();
     this.sendButton.onclick = () => this.onSendMessage();
+
+    this.connection.onreceive = (message) => this.onReceiveMessage(message);
   }
 
   // Handles clicks on the "Send" button by transmitting
@@ -64,9 +66,9 @@ class Application {
 
   // Handle onmessage events for the receiving channel.
   // These are the data messages sent by the sending channel.
-  onReceiveMessage(event) {
+  onReceiveMessage(message) {
     var element = document.createElement("p");
-    var textNode = document.createTextNode(event.data);
+    var textNode = document.createTextNode(message);
     
     element.appendChild(textNode);
     this.receiveBox.appendChild(element);

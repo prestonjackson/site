@@ -29,6 +29,7 @@ def handle_POST(request, response):
     log.info(f"handle_POST: {request.body}")
 
     requestdata = json.loads(request.body)
+    log.info(f"request data: {requestdata}")
     id = requestdata["id"]
     path = request.system["DOCUMENT_ROOT"] + "/../../data/" + id + ".metadata"
 
