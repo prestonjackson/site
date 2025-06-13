@@ -1,30 +1,44 @@
-import http
-import io
+#!/usr/bin/env python3
 
-def _parse_apache_environment(env):
-    method = http.HTTPMethod[env["REQUEST_METHOD"]]
-    protocol = env["SERVER_PROTOCOL"]
-    uri = env["REQUEST_URI"]
-        
-    headers = {}
-    system = {}
-    for key, value in env.items():
-        if key not in ["REQUEST_METHOD", "SERVER_PROTOCOL", "REQUEST_URI"] \
-            and key.startswith("HTTP_"):
-            # Strip off HTTP_, convert to standard HTTP header names
-            header_name = key[5:].lower().title().replace('_', '-')
-            headers[header_name] = value
-         
-        else:
-            # Collect other env vars
-            system[key] =  value
-        
-    return (method, protocol, uri, headers, system)
+import http
+import logging
+import io
+import os
+import re
+import sys
+import urllib.parse
+
+import debug
+import echo
+import signal
+
+log = logging.getLogger(__name__)
 
 
 class ApacheRequest(object):
+    @staticmethod
+    def _parse_apache_environment(env):
+        method = http.HTTPMethod[env["REQUEST_METHOD"]]
+        protocol = env["SERVER_PROTOCOL"]
+        uri = urllib.parse.urlparse(env["REQUEST_URI"])
+            
+        headers = {}
+        system = {}
+        for key, value in env.items():
+            if key not in ["REQUEST_METHOD", "SERVER_PROTOCOL", "REQUEST_URI"] \
+                and key.startswith("HTTP_"):
+                # Strip off HTTP_, convert to standard HTTP header names
+                header_name = key[5:].lower().title().replace('_', '-')
+                headers[header_name] = value
+            
+            else:
+                # Collect other env vars
+                system[key] =  value
+            
+        return (method, protocol, uri, headers, system)
+
     def __init__(self, env, body):
-        (method, protocol, uri, headers, system) = _parse_apache_environment(env)
+        (method, protocol, uri, headers, system) = ApacheRequest._parse_apache_environment(env)
         self.method = method
         self.protocol = protocol
         self.uri = uri
@@ -52,11 +66,12 @@ class ApacheRequest(object):
         return buffer_value
 
 
-
-def _send_apache_response(response):
-    print(response)
-
 class ApacheResponse(object):
+    @staticmethod
+    def _send_apache_response(response):
+        print(response)
+
+
     def __init__(self):
         self.headers = {}
         self.cookies = {}
@@ -91,9 +106,56 @@ class ApacheResponse(object):
         buffer.close()
 
         # Apache uses stdout as the response.
-        _send_apache_response(buffer_value)
+        ApacheResponse._send_apache_response(buffer_value)
 
         return buffer_value
 
 
+def main():
+    logging.basicConfig(filename="/tmp/api.log", level=logging.INFO)
+    log.info("==========NEW REQUEST==========")   
+    
+    request = ApacheRequest(os.environ, sys.stdin.read())
+    response = ApacheResponse()
+    log.info(request)
 
+    dispatcher = {'v0':{},
+                  'v1':{#'echo': echo.Echo,
+                        #'debug': debug.Debug,
+                        'signal': signal.Signal}
+                 }
+                
+    
+    match = re.match(r"^/api/(?P<version>v\w+)/(?P<path>.+)$",
+                     request.uri.path)
+    if not match:
+        log.info(f"unknown resource for URI: {request.uri.path}")
+        response.set_status(http.HTTPStatus.NOT_FOUND)
+
+    else:
+        log.info(f"version: {match.group('version')}")
+        log.info(f"path: {match.group('path')}")
+
+        resource = match.group("path").split('/')[0]
+        
+
+        handler = dispatcher[match.group("version")][resource]
+
+        match request.method:
+            case http.HTTPMethod.OPTIONS: 
+                handler.handle_OPTIONS(request, response)
+            case http.HTTPMethod.GET:
+                handler.handle_GET(request, response)
+            case http.HTTPMethod.POST:
+                handler.handle_POST(request, response)
+            case _:
+                log.info(f"Method: {request.method} not allowed")
+                response.set_status(http.HTTPStatus.METHOD_NOT_ALLOWED)
+
+
+    raw_response = response.flush()
+    log.info(raw_response)
+
+
+if __name__ == '__main__':
+    main()
