@@ -19,7 +19,7 @@ class Signaler {
       
       // Check if the response status is OK
       if (!response.ok) {
-        throw new Error('Response status: ${response.status}');
+        throw new Error(`Response status: ${response.status}`);
       }  
     } catch (error) {
       console.error(error.message);
@@ -37,7 +37,7 @@ class Signaler {
       
       // Check if the response status is OK
       if (!response.ok) {
-        throw new Error('Response status: ${response.status}');
+        throw new Error(`Response status: ${response.status}`);
       }
     
       // Parse the response body as JSON

@@ -18,7 +18,7 @@ log = logging.getLogger(__name__)
 class ApacheRequest(object):
     @staticmethod
     def _parse_apache_environment(env):
-        method = http.HTTPMethod[env["REQUEST_METHOD"]]
+        method = env["REQUEST_METHOD"]
         protocol = env["SERVER_PROTOCOL"]
         uri = urllib.parse.urlparse(env["REQUEST_URI"])
             
@@ -128,11 +128,7 @@ def main():
     
     match = re.match(r"^/api/(?P<version>v\w+)/(?P<path>.+)$",
                      request.uri.path)
-    if not match:
-        log.info(f"unknown resource for URI: {request.uri.path}")
-        response.set_status(http.HTTPStatus.NOT_FOUND)
-
-    else:
+    if match:
         log.info(f"version: {match.group('version')}")
         log.info(f"path: {match.group('path')}")
 
@@ -141,16 +137,18 @@ def main():
 
         handler = dispatcher[match.group("version")][resource]
 
-        match request.method:
-            case http.HTTPMethod.OPTIONS: 
-                handler.handle_OPTIONS(request, response)
-            case http.HTTPMethod.GET:
-                handler.handle_GET(request, response)
-            case http.HTTPMethod.POST:
-                handler.handle_POST(request, response)
-            case _:
-                log.info(f"Method: {request.method} not allowed")
-                response.set_status(http.HTTPStatus.METHOD_NOT_ALLOWED)
+        if request.method == "OPTIONS": 
+            handler.handle_OPTIONS(request, response)
+        elif request.method == "GET":
+            handler.handle_GET(request, response)
+        elif request.method == "POST":
+            handler.handle_POST(request, response)
+        else:
+            log.info(f"Method: {request.method} not allowed")
+            response.set_status(http.HTTPStatus.METHOD_NOT_ALLOWED)
+    else:
+        log.info(f"unknown resource for URI: {request.uri.path}")
+        response.set_status(http.HTTPStatus.NOT_FOUND)
 
 
     raw_response = response.flush()

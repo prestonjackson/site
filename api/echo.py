@@ -48,16 +48,15 @@ def main():
     log.info(request)
 
     response = gateway.ApacheResponse()
-    
-    match request.method:
-        case http.HTTPMethod.OPTIONS: 
-            handle_OPTIONS(request, response)
-        case http.HTTPMethod.GET:
-            handle_GET(request, response)
-        case http.HTTPMethod.POST:
-            handle_POST(request, response)
-        case _:
-            log.info(f"Method: {request.method} not found")
+
+    if request.method == "OPTIONS":
+        handle_OPTIONS(request, response)
+    elif request.method == "GET":
+        handle_GET(request, response)
+    elif request.method == "POST":
+        handle_POST(request, response)
+    else:
+        log.info(f"Method: {request.method} not found")
 
     raw_response = response.flush()
     log.info(raw_response)
