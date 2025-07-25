@@ -8,9 +8,9 @@
   <div id="content">
 <!--#include virtual="/template/header.html" -->
     <nav>
-      <pre>
-<!--#exec cmd="ls *.md" -->
-      </pre>
+      <ul>
+<!--#exec cmd="ls -1 *.md | awk -F'.md' '{printf \"<li><a href=\\"/blog/%s\\">%s</a></li>\\n\", $0, $1}'" -->
+      </ul>
       <pre>
 <!--#exec cmd="set" -->
       </pre>

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Preston Jackson</title>
+<!--#include virtual="/template/head.html" -->
+  <script src="/script/signaler.js"></script>
+  <script src="/script/connection.js"></script>
+  <script src="/script/app.js"></script>
+</head>
+<body onload="main(document.baseURI)">
+  <div id="content">
+<!--#include virtual="/template/header.html" -->
+    <div id="main">
+      <!--<p>Welcome to <a href="https://prestonjackson.com">prestonjackson.com</a></p> -->
+      <p>Testing <a href="https://prestonjackson.com">testapp.com</a></p>
+    </div>
+    <div id="surface">
+      <canvas id="canvas" width="400" height="400"></canvas><br/>
+    </div>
+    <div>
+      <button id="offer-button" type="button">Offer</button>
+      <button id="answer-button" type="button">Answer</button>
+      <button id="connect-button" type="button">Connect</button>
+      <button id="disconnect-button" type="button">Disconnect</button>
+      <button id="send-button" type="button">Send</button>
+      <input id="message-input-box" type="text" size="60" placeholder="Message">
+      </input>
+      <div id="receive-box">
+        <p>Received messages:</p>
+      </div>
+      </div>
+    </div>
+<!--#include virtual="/template/footer.html" -->
+  </div>
+</body>
+</html>

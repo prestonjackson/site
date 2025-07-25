@@ -7,28 +7,27 @@
   <script src="/script/connection.js"></script>
   <script src="/script/app.js"></script>
 </head>
-<body onload="main(document.baseURI)">
+<body>
   <div id="content">
 <!--#include virtual="/template/header.html" -->
-    <div id="main">
-      <!--<p>Welcome to <a href="https://prestonjackson.com">prestonjackson.com</a></p> -->
-      <p>Testing <a href="https://prestonjackson.com">testapp.com</a></p>
-    </div>
-    <div id="surface">
-      <canvas id="canvas" width="400" height="400"></canvas><br/>
-    </div>
-    <div>
-      <button id="offer-button" type="button">Offer</button>
-      <button id="answer-button" type="button">Answer</button>
-      <button id="connect-button" type="button">Connect</button>
-      <button id="disconnect-button" type="button">Disconnect</button>
-      <button id="send-button" type="button">Send</button>
-      <input id="message-input-box" type="text" size="60" placeholder="Message">
-      </input>
-      <div id="receive-box">
-        <p>Received messages:</p>
-      </div>
-      </div>
+    <div class="container">
+      <aside class="left-column">
+        <h2>Entries</h2>
+        <ul id="blog-entries">
+          <li><a href="/doc/index.html">Home</a></li>
+          <li><a href="/doc/entries.html">Entries</a></li>
+          <li><a href="/doc/about.html">About</a></li>
+          <li><a href="/doc/contact.html">Contact</a></li>
+          <li><a href="/doc/privacy.html">Privacy Policy</a></li>
+        </ul>
+      </aside>
+      <main id="main-content" class="middle-column">
+        <h2>Welcome!</h2>
+        <p>Select a blog post from the left to read it.</p>
+      </main>
+      <aside id="footnotes" class="right-column">
+        <h2>Footnotes</h2>
+      </aside>
     </div>
 <!--#include virtual="/template/footer.html" -->
   </div>

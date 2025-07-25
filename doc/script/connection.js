@@ -10,7 +10,7 @@ class Connection {
 
     // The signaling service is required to exchange connection
     // offers and answers and ICE candidates
-    this.signaler = new Signaler(this.baseURI + "api/signal");
+    this.signaler = new Signaler(this.baseURI + "api/v1/signal");
 
     this.connection = null;   // Peer-to-peer RTCPeerConnection
     this.channel = null;       // RTCDataChannel for sending/receiving data
