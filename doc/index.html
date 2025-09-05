@@ -3,33 +3,33 @@
 <head>
   <title>Preston Jackson</title>
 <!--#include virtual="/template/head.html" -->
-  <script src="/script/signaler.js"></script>
-  <script src="/script/connection.js"></script>
-  <script src="/script/app.js"></script>
 </head>
 <body>
-  <div id="content">
 <!--#include virtual="/template/header.html" -->
-    <div class="container">
-      <aside class="left-column">
-        <h2>Entries</h2>
-        <ul id="blog-entries">
-          <li><a href="/doc/index.html">Home</a></li>
-          <li><a href="/doc/entries.html">Entries</a></li>
-          <li><a href="/doc/about.html">About</a></li>
-          <li><a href="/doc/contact.html">Contact</a></li>
-          <li><a href="/doc/privacy.html">Privacy Policy</a></li>
+  <main>
+    <article id="main-content" class="middle-column">
+      <h2>Welcome!</h2>
+      <p>I'm Preston Jackson. 
+      <p>I'm exploring collaboration and 3D modeling in local first
+        development, especially as these are related to 3D modeling.</p>
+      <p>After years of web development using the latest frameworks, languages,
+        and build environment, I'm building <a href="/">Doggedly</a> in the
+        simplest way I possibly can:
+        <ul>
+          <li>Frontend: HTML for markup, Markdown for content, CSS for styling, 
+            Javascript for interaction. I am leaning on browser-common web
+            technologies like WebRTC, WebGPU, and Web Crypto. But building the
+            rest from scratch.
+          </li>
+          <li>Backend: Apache for the webserver and Python for server-side scripting</li>
+          <li>Database: Simply using the filesystem for data storage</li>
+          <li>OS: macOS for local development and testing, and Debian for
+            public hosting.</li>
         </ul>
-      </aside>
-      <main id="main-content" class="middle-column">
-        <h2>Welcome!</h2>
-        <p>Select a blog post from the left to read it.</p>
-      </main>
-      <aside id="footnotes" class="right-column">
-        <h2>Footnotes</h2>
-      </aside>
-    </div>
+      </p>
+      <p>Expect rough edges as we go along!</p>
+    </article>
+  </main>
 <!--#include virtual="/template/footer.html" -->
-  </div>
 </body>
 </html>
