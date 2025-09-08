@@ -1,9 +1,14 @@
-# Apache is installed by default
 
 # Install required software by installing Xcode Command Line Tools
 # This includes git, python3. This is a one-time install.
 # xcode-select --install
 
+# Install cmark-gfm
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+/usr/local/bin/brew install cmark-gfm
+
+# Apache is installed by default
+#
 # Modify /etc/apache2/httpd.conf
 #
 # Uncomment the following lines:
@@ -11,8 +16,6 @@
 #
 # 174         LoadModule cgi_module libexec/apache2/mod_cgi.so
 #
-# Add this line right before "Include /private/etc/apache2/other/*.conf"
-# Define SITE_ROOT /Library/Webserver
 
 # Download the website from github.com
 sudo mkdir -p /Library/WebServer/prestonjackson.com
@@ -20,8 +23,7 @@ sudo chown -R $USER:$(id -gn) /Library/WebServer/prestonjackson.com
 cd /Library/WebServer/prestonjackson.com
 git clone https://github.com/prestonjackson/site.git
 
-# Add the configuration for the site
-sudo ln -s /Library/WebServer/prestonjackson.com/site/config/apache2/sites-available/prestonjackson.com.conf /etc/apache2/other/prestonjackson.com.conf
+# Follow instructions in /Library/WebServer/prestonjackson.com/site/config/apache2/prestonjackson.com.conf
 
 # Test syntax of the config and bounce Apache2
 sudo apachectl configtest

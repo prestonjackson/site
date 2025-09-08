@@ -9,6 +9,7 @@ sudo apt-get autoremove
 
 # Install required software
 sudo apt-get install git
+sudo apt-get install cmark-gfm
 # These are installed on the default image
 # sudo apt-get install apache2
 # sudo apt-get install python3
@@ -18,22 +19,19 @@ sudo a2enmod ssl
 sudo a2enmod cgi
 sudo a2enmod rewrite
 sudo a2enmod include
+sudo a2enmod env
 
 # Download the website from github.com
 sudo mkdir -p /var/www/prestonjackson.com
 sudo chown -R $USER:$USER /var/www/prestonjackson.com
 cd /var/www/prestonjackson.com
 git clone https://github.com/prestonjackson/site.git
-sudo cp site/config/apache2/sites-available/prestonjackson.com.conf /etc/apache2/sites-available/prestonjackson.com.conf
-# Enable CGI support in Apache2
-sudo cp site/config/apache2/conf-enabled/serve-cgi-bin.conf /etc/apache2/conf-enabled/serve-cgi-bin.conf
-# Enable UTF-8 support in Apache2
-sudo cp site/config/apache2/conf-enabled/charset.conf /etc/apache2/conf-enabled/charset.conf
-
 
 # Enable the site and disable the default site
 sudo a2ensite prestonjackson.com.conf
 sudo a2dissite 000-default.conf
+
+# Follow instructions for Debian in site/config/apache2/prestonjackson.com.conf
 
 # Bounce apache to pick up changes
 # sudo systemctl status apache2
