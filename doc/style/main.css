@@ -1,14 +1,31 @@
-h/* General Resets and Body Styling */
+/* Root Variables */
+:root {
+    --color-bg: #f3f4f6;  /* Equivalent to bg-gray-100 */
+    --color-text: #1f2937;  /* Equivalent to text-gray-800 */
+    --color-footer-text: var(--color-bg);
+    --color-footer-bg: var(--color-text);
+    --color-content-bg: #ffffff;  /* Equivalent to bg-white */
+    --color-header-shadow: rgb(0 0 0 / 0.1);
+    --color-link: #2563eb;  /* Equivalent to text-blue-600 */
+    --color-link-hover: #1d4ed8;  /* Equivalent to hover:text-blue-500 */
+    --color-nav-link: #4b5563;  /* Equivalent to text-gray-600 */
+    --color-nav-link-hover: #3b82f6;  /* Equivalent to text-blue-500 */
+    --color-box-shadow: rgb(0 0 0 / 0.1);
+    --shadow: 0 4px 6px -1px var(--color-box-shadow),
+              0 2px 4px -2px var(--color-box-shadow);
+}
+
+/* General Resets and Body Styling */
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    box-sizing: border-box;  /* Include padding and border in width, height */
 }
 
 body {
     font-family: 'Helvetica Neue', sans-serif;
-    background-color: #f3f4f6; /* Equivalent to bg-gray-100 */
-    color: #1f2937; /* Equivalent to text-gray-800 */
+    background-color: var(--color-bg); 
+    color: var(--color-text); 
     
     /* Core Sticky Footer Logic */
     display: flex;
@@ -28,9 +45,9 @@ body {
 
 /* Header Styling */
 header {
-    background-color: #ffffff;
+    background-color: var(--color-content-bg);
     padding: 1rem;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    box-shadow: var(--shadow);
 }
 
 header .container {
@@ -44,6 +61,11 @@ header h1 {
     font-weight: 700;
 }
 
+header a {
+    text-decoration: none;  /* Remove underline. */
+}
+
+/* Navigation Styling */
 nav ul {
     display: flex;
     list-style: none;
@@ -51,32 +73,33 @@ nav ul {
 }
 
 nav a {
-    color: #4b5563; /* text-gray-600 */
-    text-decoration: none;
+    color: var(--color-nav-link);
+    text-decoration: none;  /* Remove underline */
     transition: color 0.2s ease-in-out;
 }
 
 nav a:hover {
-    color: #3b82f6; /* hover:text-blue-500 */
+    color: var(--color-nav-link-hover);
 }
 
 /* Main Content Styling */
 main {
-    /* This makes the main content area grow to fill available space, pushing the footer down */
+    /* This makes the main content area grow to fill available space, pushing
+     * the footer down */
     flex-grow: 1;
     display: flex;
     flex-direction: column; /* Stacking on mobile by default */
-    gap: 2rem; /* gap-8 */
+    gap: 1rem;
     padding-top: 1rem;
     padding-bottom: 1rem;
 }
 
 /* Aside (Left Column) Styling */
 aside {
-    background-color: #ffffff;
+    background-color: var(--color-content-bg);
     padding: 1.5rem;
     border-radius: 0.5rem;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    box-shadow: var(--shadow);
     height: fit-content; /* Only take up as much height as needed */
 }
 
@@ -90,25 +113,32 @@ aside h2 {
 
 aside ul {
     list-style: none;
+    padding: 0;
 }
 
 aside a {
     display: block;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
-    color: #2563eb; /* text-blue-600 */
+    color: var(--color-link);
 }
 
 aside a:hover {
-    text-decoration: underline;
+    color: var(--color-nav-link-hover);
 }
 
 /* Article (Right Column) Styling */
 article {
-    background-color: #ffffff;
+    background-color: var(--color-content-bg);
     padding: 1.5rem;
     border-radius: 0.5rem;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    box-shadow: var(--shadow);
+}
+
+article h1 {
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    padding-bottom: 1rem;
 }
 
 article h2 {
@@ -118,14 +148,20 @@ article h2 {
 }
 
 article p {
+    font-family: 'Georgia', serif;
     margin-bottom: 1rem;
-    line-height: 1.6;
+    line-height: 1.5;
+}
+
+article ul {
+    margin-bottom: 1rem;
+    padding-left: 1.5rem; /* Indent list */
 }
 
 /* Footer Styling */
 footer {
-    background-color: #1f2937; /* bg-gray-800 */
-    color: #ffffff;
+    background-color: var(--color-footer-bg);
+    color: var(--color-footer-text);
     padding: 1rem;
     margin-top: 2rem; /* mt-8 */
     text-align: center;
