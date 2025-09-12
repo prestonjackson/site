@@ -11,12 +11,12 @@
       <h2>Recent</h2>    
       <ul>
 <!-- Convert the list of Markdown files in the current directory to links -->
-<!--#exec cmd="ls -1r *.md | xargs -I {} sh -c 'echo \"<a href=\"/blog/{}\">{}</a>\"'" -->
+<!--#include virtual="/bin/get-recents.py?dir=blog" -->
       </ul>
     </aside>
     <article>
 <!-- Convert the Markdown file to HTML -->
-<!--#exec cmd="cmark-gfm -t html --smart --validate-utf8 -e footnotes -e table -e strikethrough -e tasklist $QUERY_STRING" -->
+<!--#include virtual="/bin/convert-markdown.py" -->
     </article>
   </main>
 <!--#include virtual="/template/footer.html" -->
