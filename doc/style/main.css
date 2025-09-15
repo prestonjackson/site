@@ -112,12 +112,14 @@ aside h2 {
 }
 
 aside ul {
+    font-family: 'Georgia', serif;
     list-style: none;
     padding: 0;
 }
 
 aside a {
-    display: block;
+    font-family: 'Helvetica Neue', sans-serif;
+    display: inline-block;
     padding-top: 0.5rem;
     padding-bottom: 0.5rem;
     color: var(--color-link);
@@ -154,6 +156,7 @@ article p {
 }
 
 article ul {
+    font-family: 'Georgia', serif;
     margin-bottom: 1rem;
     padding-left: 1.5rem; /* Indent list */
 }
