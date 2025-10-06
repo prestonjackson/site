@@ -10,7 +10,7 @@ The trouble with a blog is that there's not enough cutting. It's too easy to jus
 
 My grandfather worked and worked on a personal history. He wrote stories, cut out fluff, wrote again, threw away parts without meaning. What is left is a treasure to me. I can see the personality of his youth coming through. There's a great story of him as a little boy in his father's workshop. I love it! I see my great grandparents, whom I never met, through his innocent eyes. And yet, I wish I could go scrape up the scraps on his cutting room floor. I would love more of what he wrote. I want to hear all the experiences he didn't think were worth sharing, but that I crave to know him better. It is possible to cut too much.
 
- This short post on post outlines my thinking and decisions while setting up the prestonjackson.com website. My goal is to self host, understand the software that I use, minimize the technologies that the site depends on, and use only freely available tools.
+ This short post outlines my thinking and decisions while setting up the prestonjackson.com website. My goal is to self host, understand the software that I use, minimize the technologies that the site depends on, and use only freely available tools.
 
 My thesis is that complex and expensive hosting systems are useful only for sites that receive high levels of traffic. But I do not know if this is true.I've been discouraged by the burden of complex frameworks when I only want to publish a simple site, but also, I enjoy understanding how technologies work from top to bottom. Extensive frameworks feel like I'm making changes at arms length.
 
