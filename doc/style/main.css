@@ -1,18 +1,71 @@
 /* Root Variables */
 :root {
-    --color-bg: #f3f4f6;  /* Equivalent to bg-gray-100 */
-    --color-text: #1f2937;  /* Equivalent to text-gray-800 */
+    /* Colors - Modern palette with better contrast */
+    --color-bg: #f8f9fa;  /* Slightly warmer light gray */
+    --color-text: #2c3e50;  /* Darker, richer text color */
     --color-footer-text: var(--color-bg);
     --color-footer-bg: var(--color-text);
-    --color-content-bg: #ffffff;  /* Equivalent to bg-white */
-    --color-header-shadow: rgb(0 0 0 / 0.1);
-    --color-link: #2563eb;  /* Equivalent to text-blue-600 */
-    --color-link-hover: #1d4ed8;  /* Equivalent to hover:text-blue-500 */
-    --color-nav-link: #4b5563;  /* Equivalent to text-gray-600 */
-    --color-nav-link-hover: #3b82f6;  /* Equivalent to text-blue-500 */
-    --color-box-shadow: rgb(0 0 0 / 0.1);
+    --color-content-bg: #ffffff;  /* Pure white for content cards */
+    --color-header-shadow: rgb(0 0 0 / 0.08);
+    --color-link: #1e40af;  /* Richer, deeper blue */
+    --color-link-hover: #1e3a8a;  /* Even deeper blue on hover */
+    --color-nav-link: #495057;  /* Better contrast gray */
+    --color-nav-link-hover: #3b82f6;  /* Vibrant blue hover */
+    --color-border: #e9ecef;  /* Subtle borders */
+    --color-box-shadow: rgb(0 0 0 / 0.06);
+    
+    /* Typography - Font family */
+    --font-family: 'Helvetica Neue', sans-serif;
+    
+    /* Typography - Font weights */
+    --font-thin: 200;
+    --font-light: 300;
+    --font-regular: 400;
+    --font-medium: 500;
+    --font-bold: 700;
+    
+    /* Typography - Font sizes (modular scale) */
+    --text-xs: 0.875rem;    /* 14px */
+    --text-sm: 0.95rem;     /* 15px */
+    --text-base: 1rem;      /* 16px */
+    --text-lg: 1.025rem;    /* 16.4px */
+    --text-xl: 1.25rem;     /* 20px */
+    --text-2xl: 1.375rem;   /* 22px */
+    --text-3xl: 1.625rem;   /* 26px */
+    --text-4xl: 2rem;       /* 32px */
+    --text-5xl: 2.25rem;    /* 36px */
+    
+    /* Typography - Line heights */
+    --line-height-tight: 1.3;
+    --line-height-normal: 1.6;
+    --line-height-relaxed: 1.8;
+    
+    /* Spacing/Sizing scale */
+    --spacing-xs: 0.5rem;   /* 8px */
+    --spacing-sm: 0.75rem;  /* 12px */
+    --spacing-md: 1rem;     /* 16px */
+    --spacing-lg: 1.5rem;   /* 24px */
+    --spacing-xl: 2rem;     /* 32px */
+    --spacing-2xl: 2.5rem;  /* 40px */
+    --spacing-3xl: 3rem;    /* 48px */
+    
+    /* Border radius */
+    --radius-sm: 0.25rem;
+    --radius-base: 0.5rem;
+    --radius-lg: 1rem;
+    
+    /* Borders */
+    --border-thin: 1px solid var(--color-border);
+    --border-medium: 2px solid var(--color-border);
+    
+    /* Shadows */
     --shadow: 0 4px 6px -1px var(--color-box-shadow),
               0 2px 4px -2px var(--color-box-shadow);
+    --shadow-sm: 0 1px 2px 0 var(--color-box-shadow);
+    
+    /* Transitions */
+    --transition-fast: 0.2s ease-in-out;
+    --transition-normal: 0.3s ease-in-out;
 }
 
 /* General Resets and Body Styling */
@@ -23,11 +76,12 @@
 }
 
 body {
-    font-family: 'Helvetica Neue', sans-serif;
-    background-color: var(--color-bg); 
-    color: var(--color-text); 
-    
-    /* Core Sticky Footer Logic */
+    font-family: var(--font-family);
+    font-weight: var(--font-light);
+    font-size: var(--text-base);
+    line-height: var(--line-height-normal);
+    background-color: var(--color-bg);
+    color: var(--color-text);
     display: flex;
     flex-direction: column;
     min-height: 100vh;
@@ -39,14 +93,14 @@ body {
     max-width: 1280px; /* Standard container width */
     margin-left: auto;
     margin-right: auto;
-    padding-left: 1rem;
-    padding-right: 1rem;
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
 }
 
 /* Header Styling */
 header {
     background-color: var(--color-content-bg);
-    padding: 1rem;
+    padding: 1.5rem 1rem;
     box-shadow: var(--shadow);
 }
 
@@ -57,25 +111,31 @@ header .container {
 }
 
 header h1 {
-    font-size: 1.875rem; /* 30px */
-    font-weight: 700;
+    font-family: var(--font-family);
+    font-size: var(--text-5xl);
+    font-weight: var(--font-thin);
+    letter-spacing: -0.5px;
 }
 
 header a {
     text-decoration: none;  /* Remove underline. */
+    color: var(--color-text);
 }
 
 /* Navigation Styling */
 nav ul {
     display: flex;
     list-style: none;
-    gap: 1.5rem; /* space-x-6 */
+    gap: 2rem; /* increased from 1.5rem */
 }
 
 nav a {
+    font-family: var(--font-family);
+    font-weight: var(--font-medium);
     color: var(--color-nav-link);
     text-decoration: none;  /* Remove underline */
-    transition: color 0.2s ease-in-out;
+    transition: color var(--transition-normal);
+    font-size: var(--text-base);
 }
 
 nav a:hover {
@@ -89,85 +149,125 @@ main {
     flex-grow: 1;
     display: flex;
     flex-direction: column; /* Stacking on mobile by default */
-    gap: 1rem;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
+    gap: 1.5rem; /* increased from 1rem */
+    padding: 2rem 1rem; /* increased padding */
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
 }
 
 /* Aside (Left Column) Styling */
 aside {
     background-color: var(--color-content-bg);
-    padding: 1.5rem;
+    padding: 2rem; /* increased from 1.5rem */
     border-radius: 0.5rem;
     box-shadow: var(--shadow);
     height: fit-content; /* Only take up as much height as needed */
 }
 
 aside h2 {
-    font-size: 1.25rem; /* 20px */
-    font-weight: 700;
-    margin-bottom: 1rem;
-    border-bottom: 1px solid #e5e7eb;
-    padding-bottom: 0.5rem;
+    font-size: 1.375rem; /* 22px - increased from 20px */
+    font-weight: var(--font-bold);
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid var(--color-border);
+    padding-bottom: 0.75rem;
 }
 
 aside ul {
-    font-family: 'Georgia', serif;
     list-style: none;
     padding: 0;
 }
 
+aside li {
+    margin-bottom: 0.75rem;
+}
+
 aside a {
-    font-family: 'Helvetica Neue', sans-serif;
+    font-weight: var(--font-medium);
     display: inline-block;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
+    padding: 0.5rem 0;
     color: var(--color-link);
+    text-decoration: none;
+    transition: color 0.2s ease-in-out;
+    font-size: 0.95rem;
 }
 
 aside a:hover {
-    color: var(--color-nav-link-hover);
+    color: var(--color-link-hover);
 }
 
 /* Article (Right Column) Styling */
 article {
     background-color: var(--color-content-bg);
-    padding: 1.5rem;
+    padding: 2rem; /* increased from 1.5rem */
     border-radius: 0.5rem;
     box-shadow: var(--shadow);
 }
 
 article h1 {
-    margin-bottom: 1.5rem;
-    border-bottom: 1px solid #e5e7eb;
-    padding-bottom: 1rem;
+    font-family: var(--font-family);
+    font-size: var(--text-4xl);
+    font-weight: var(--font-thin);
+    margin-bottom: var(--spacing-lg);
+    border-bottom: var(--border-medium);
+    padding-bottom: var(--spacing-md);
+    line-height: var(--line-height-tight);
 }
 
 article h2 {
-    font-size: 1.5rem; /* 24px */
-    font-weight: 700;
+    font-size: 1.625rem; /* 26px - increased from 24px */
+    font-weight: var(--font-thin);
+    margin-top: 2rem;
     margin-bottom: 1rem;
+    line-height: var(--line-height-tight);
+}
+
+article h3 {
+    font-size: 1.25rem; /* 20px */
+    font-weight: var(--font-thin);
+    margin-top: 1.5rem;
+    margin-bottom: 0.75rem;
+    line-height: var(--line-height-tight);
 }
 
 article p {
-    font-family: 'Georgia', serif;
-    margin-bottom: 1rem;
-    line-height: 1.5;
+    font-family: var(--font-family);
+    margin-bottom: var(--spacing-lg);
+    line-height: var(--line-height-relaxed);
+    font-size: var(--text-lg);
 }
 
-article ul {
-    font-family: 'Georgia', serif;
-    margin-bottom: 1rem;
-    padding-left: 1.5rem; /* Indent list */
+article ul,
+article ol {
+    margin-bottom: 1.25rem;
+    padding-left: 1.75rem;
+    line-height: var(--line-height-relaxed);
+}
+
+article li {
+    margin-bottom: 0.5rem;
+}
+
+article a {
+    color: var(--color-link);
+    text-decoration: underline;
+    transition: color 0.2s ease-in-out;
+}
+
+article a:hover {
+    color: var(--color-link-hover);
+    text-decoration: none;
 }
 
 /* Footer Styling */
 footer {
     background-color: var(--color-footer-bg);
     color: var(--color-footer-text);
-    padding: 1rem;
-    margin-top: 2rem; /* mt-8 */
+    padding: 0.5rem;
+    margin-top: 2rem;
     text-align: center;
+    font-size: 0.875rem;
+    font-weight: var(--font-regular);
 }
 
 /* Responsive Layout for larger screens (e.g., tablets and desktops) */
@@ -175,6 +275,8 @@ footer {
 @media (min-width: 1024px) {
     main {
         flex-direction: row; /* Side-by-side columns on large screens */
+        padding: 2rem;
+        gap: 2rem; /* increased from 1.5rem */
     }
     aside {
         /* This width is ~30% of the article's width (23% / 77% ≈ 0.3) */
