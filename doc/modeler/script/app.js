@@ -50,6 +50,18 @@ class Application {
     this.sendButton.onclick = () => this.onSendMessage();
 
     this.connection.onreceive = (message) => this.onReceiveMessage(message);
+
+    // Set up the canvas, get the resolution correct.
+    window.addEventListener("resize", () => this.resizeCanvas());
+    this.resizeCanvas();
+  }
+
+  // Resize the canvas to fit its container.
+  resizeCanvas() {
+    const canvas = document.getElementById("canvas");
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = canvas.clientWidth * dpr;
+    canvas.height = canvas.clientHeight * dpr;
   }
 
   // Handles clicks on the "Send" button by transmitting
