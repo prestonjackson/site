@@ -9,15 +9,10 @@
 </head>
 <body onload="main(document.baseURI)">
   <div id="content">
-<!--#include virtual="/template/header.html" -->
-    <div id="main">
-      <!--<p>Welcome to <a href="https://prestonjackson.com">prestonjackson.com</a></p> -->
-      <p>Testing <a href="https://prestonjackson.com">testapp.com</a></p>
-    </div>
     <div id="surface">
-      <canvas id="canvas"></canvas><br/>
+      <canvas id="canvas"></canvas>
     </div>
-    <div>
+    <div id="controls">
       <button id="offer-button" type="button">Offer</button>
       <button id="answer-button" type="button">Answer</button>
       <button id="connect-button" type="button">Connect</button>
@@ -28,9 +23,7 @@
       <div id="receive-box">
         <p>Received messages:</p>
       </div>
-      </div>
     </div>
-<!--#include virtual="/template/footer.html" -->
   </div>
 </body>
 </html>
