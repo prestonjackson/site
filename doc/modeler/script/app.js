@@ -17,6 +17,7 @@ class Application {
     this.id = "abcd";
 
     this.connection = null;
+    this.canvas = null;
 
     this.offerButton = null;
     this.answerButton = null;
@@ -29,6 +30,13 @@ class Application {
 
   run() {
     console.log("Application run");
+
+    // Set up the canvas with WebGPU
+    const canvasElement = document.getElementById("canvas");
+    this.canvas = new Canvas(canvasElement);
+    this.canvas.initialize().catch(err => {
+      console.error("Failed to initialize canvas:", err);
+    });
 
     // Set up the peer connection
     this.connection =  new Connection(this.baseURI);
@@ -58,10 +66,10 @@ class Application {
 
   // Resize the canvas to fit its container.
   resizeCanvas() {
-    const canvas = document.getElementById("canvas");
+    const canvasElement = document.getElementById("canvas");
     const dpr = window.devicePixelRatio || 1;
-    canvas.width = canvas.clientWidth * dpr;
-    canvas.height = canvas.clientHeight * dpr;
+    canvasElement.width = canvasElement.clientWidth * dpr;
+    canvasElement.height = canvasElement.clientHeight * dpr;
   }
 
   // Handles clicks on the "Send" button by transmitting
