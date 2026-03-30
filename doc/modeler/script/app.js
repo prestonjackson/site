@@ -18,6 +18,7 @@ class Application {
 
     this.connection = null;
     this.canvas = null;
+    this.activeTool = null;
 
     this.offerButton = null;
     this.answerButton = null;
@@ -26,6 +27,10 @@ class Application {
     this.sendButton = null;
     this.messageInputBox = null;
     this.receiveBox = null;
+
+    this.truckButton = null;
+    this.dollyButton = null;
+    this.orbitButton = null;
   }
 
   run() {
@@ -41,7 +46,16 @@ class Application {
     // Set up the peer connection
     this.connection =  new Connection(this.baseURI);
 
-    // Set handlers for the buttons.
+    // Set handlers for the toolbar buttons.
+    this.truckButton = document.getElementById("truck-button");
+    this.dollyButton = document.getElementById("dolly-button");
+    this.orbitButton = document.getElementById("orbit-button");
+
+    this.truckButton.onclick = () => this.activateTool('truck');
+    this.dollyButton.onclick = () => this.activateTool('dolly');
+    this.orbitButton.onclick = () => this.activateTool('orbit');
+
+    // Set handlers for the control buttons.
     this.offerButton = document.getElementById("offer-button");
     this.answerButton = document.getElementById("answer-button");
     this.connectButton = document.getElementById("connect-button");
@@ -58,6 +72,11 @@ class Application {
     this.sendButton.onclick = () => this.onSendMessage();
 
     this.connection.onreceive = (message) => this.onReceiveMessage(message);
+
+    // Register canvas mouse event listeners.
+    canvasElement.addEventListener('mousedown', (e) => this.onCanvasMouseDown(e));
+    canvasElement.addEventListener('mousemove', (e) => this.onCanvasMouseMove(e));
+    canvasElement.addEventListener('mouseup', (e) => this.onCanvasMouseUp(e));
 
     // Set up the canvas, get the resolution correct.
     window.addEventListener("resize", () => this.resizeCanvas());
@@ -119,6 +138,55 @@ class Application {
  
     this.messageInputBox.value = "";
     this.messageInputBox.disabled = true;
+  }
+
+  // Activate a tool by name. Deactivates the current tool and creates a new one.
+  // @param {string} toolName - The name of the tool to activate ('truck', 'dolly', or 'orbit')
+  activateTool(toolName) {
+    // Deactivate current tool if one is active
+    if (this.activeTool) {
+      this.activeTool.deactivate();
+    }
+
+    // Create and activate the new tool
+    switch(toolName) {
+      case 'truck':
+        this.activeTool = new Truck();
+        break;
+      case 'dolly':
+        this.activeTool = new Dolly();
+        break;
+      case 'orbit':
+        this.activeTool = new Orbit();
+        break;
+      default:
+        console.warn(`Unknown tool: ${toolName}`);
+        this.activeTool = null;
+        return;
+    }
+
+    this.activeTool.activate();
+  }
+
+  // Forward mouse down events to the active tool
+  onCanvasMouseDown(event) {
+    if (this.activeTool) {
+      this.activeTool.onMouseDown(event);
+    }
+  }
+
+  // Forward mouse move events to the active tool
+  onCanvasMouseMove(event) {
+    if (this.activeTool) {
+      this.activeTool.onMouseMove(event);
+    }
+  }
+
+  // Forward mouse up events to the active tool
+  onCanvasMouseUp(event) {
+    if (this.activeTool) {
+      this.activeTool.onMouseUp(event);
+    }
   }
 }
 
