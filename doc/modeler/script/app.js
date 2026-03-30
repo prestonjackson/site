@@ -18,7 +18,9 @@ class Application {
 
     this.connection = null;
     this.canvas = null;
+    this.canvasElement = null;
     this.activeTool = null;
+    this.activeToolButton = null;
 
     this.offerButton = null;
     this.answerButton = null;
@@ -31,6 +33,10 @@ class Application {
     this.truckButton = null;
     this.dollyButton = null;
     this.orbitButton = null;
+    this.selectButton = null;
+    this.pencilButton = null;
+    this.rectangleButton = null;
+    this.ovalButton = null;
   }
 
   run() {
@@ -38,6 +44,7 @@ class Application {
 
     // Set up the canvas with WebGPU
     const canvasElement = document.getElementById("canvas");
+    this.canvasElement = canvasElement;
     this.canvas = new Canvas(canvasElement);
     this.canvas.initialize().catch(err => {
       console.error("Failed to initialize canvas:", err);
@@ -47,13 +54,21 @@ class Application {
     this.connection =  new Connection(this.baseURI);
 
     // Set handlers for the toolbar buttons.
-    this.truckButton = document.getElementById("truck-button");
-    this.dollyButton = document.getElementById("dolly-button");
+    this.selectButton = document.getElementById("select-button");
     this.orbitButton = document.getElementById("orbit-button");
+    this.dollyButton = document.getElementById("dolly-button");
+    this.truckButton = document.getElementById("truck-button");
+    this.pencilButton = document.getElementById("pencil-button");
+    this.rectangleButton = document.getElementById("rectangle-button");
+    this.ovalButton = document.getElementById("oval-button");
 
-    this.truckButton.onclick = () => this.activateTool('truck');
-    this.dollyButton.onclick = () => this.activateTool('dolly');
+    this.selectButton.onclick = () => this.activateTool('select');
     this.orbitButton.onclick = () => this.activateTool('orbit');
+    this.dollyButton.onclick = () => this.activateTool('dolly');
+    this.truckButton.onclick = () => this.activateTool('truck');
+    this.pencilButton.onclick = () => this.activateTool('pencil');
+    this.rectangleButton.onclick = () => this.activateTool('rectangle');
+    this.ovalButton.onclick = () => this.activateTool('oval');
 
     // Set handlers for the control buttons.
     this.offerButton = document.getElementById("offer-button");
@@ -141,28 +156,67 @@ class Application {
   }
 
   // Activate a tool by name. Deactivates the current tool and creates a new one.
-  // @param {string} toolName - The name of the tool to activate ('truck', 'dolly', or 'orbit')
+  // @param {string} toolName - The name of the tool to activate ('select', 'orbit', 'dolly', 'truck', 'pencil', 'rectangle', or 'oval')
   activateTool(toolName) {
-    // Deactivate current tool if one is active
+    // Deactivate current tool and button
     if (this.activeTool) {
       this.activeTool.deactivate();
     }
+    if (this.activeToolButton) {
+      this.activeToolButton.classList.remove('active');
+    }
 
     // Create and activate the new tool
+    let toolIcon = null;
     switch(toolName) {
-      case 'truck':
-        this.activeTool = new Truck();
-        break;
-      case 'dolly':
-        this.activeTool = new Dolly();
+      case 'select':
+        this.activeTool = new Select();
+        this.activeToolButton = this.selectButton;
+        toolIcon = '/modeler/image/select.svg';
         break;
       case 'orbit':
         this.activeTool = new Orbit();
+        this.activeToolButton = this.orbitButton;
+        toolIcon = '/modeler/image/orbit.svg';
+        break;
+      case 'dolly':
+        this.activeTool = new Dolly();
+        this.activeToolButton = this.dollyButton;
+        toolIcon = '/modeler/image/dolly.svg';
+        break;
+      case 'truck':
+        this.activeTool = new Truck();
+        this.activeToolButton = this.truckButton;
+        toolIcon = '/modeler/image/truck.svg';
+        break;
+      case 'pencil':
+        this.activeTool = new Pencil();
+        this.activeToolButton = this.pencilButton;
+        toolIcon = '/modeler/image/pencil.svg';
+        break;
+      case 'rectangle':
+        this.activeTool = new Rectangle();
+        this.activeToolButton = this.rectangleButton;
+        toolIcon = '/modeler/image/rectangle.svg';
+        break;
+      case 'oval':
+        this.activeTool = new Oval();
+        this.activeToolButton = this.ovalButton;
+        toolIcon = '/modeler/image/oval.svg';
         break;
       default:
         console.warn(`Unknown tool: ${toolName}`);
         this.activeTool = null;
+        this.activeToolButton = null;
         return;
+    }
+
+    // Highlight the active button
+    this.activeToolButton.classList.add('active');
+
+    // Set custom cursor
+    if (toolIcon && this.canvasElement) {
+      this.canvasElement.style.cursor = `url('${toolIcon}') 12 12, auto`;
     }
 
     this.activeTool.activate();

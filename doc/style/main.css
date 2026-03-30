@@ -337,8 +337,8 @@ button {
     font-family: var(--font-family);
     font-size: 0.75rem; /* 12px */
     font-weight: var(--font-medium);
-    color: var(--color-content-bg);
-    background-color: #5B9FE0; /* Lighter blue */
+    color: #000000;
+    background-color: #A8D5F7; /* Light blue */
     border: none;
     border-radius: 0.25rem;
     padding: 0.25rem 0.375rem; /* Even smaller: 4px 6px */
@@ -353,7 +353,7 @@ button {
 }
 
 button:hover {
-    background-color: #4A90E2; /* Slightly darker on hover */
+    background-color: #7DB8E8; /* Slightly darker on hover */
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
 }
 
@@ -368,20 +368,14 @@ button:disabled {
     box-shadow: none;
 }
 
-button:hover {
-    background-color: var(--color-link-hover);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+/* Active tool button styling */
+button.active {
+    background-color: #5B9FE0; /* Darker blue when active */
+    color: #ffffff; /* White text when active */
 }
 
-button:active {
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
-}
-
-button:disabled {
-    background-color: #d0d0d0;
-    color: #999999;
-    cursor: not-allowed;
-    box-shadow: none;
+button.active:hover {
+    background-color: #4A90E2; /* Match hover state */
 }
 
 /* Responsive Layout for larger screens (e.g., tablets and desktops) */

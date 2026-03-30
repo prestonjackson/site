@@ -7,9 +7,13 @@
   <script src="/modeler/script/connection.js"></script>
   <script src="/modeler/script/canvas.js"></script>
   <script src="/modeler/script/tool.js"></script>
-  <script src="/modeler/script/truck.js"></script>
-  <script src="/modeler/script/dolly.js"></script>
+  <script src="/modeler/script/select.js"></script>
   <script src="/modeler/script/orbit.js"></script>
+  <script src="/modeler/script/dolly.js"></script>
+  <script src="/modeler/script/truck.js"></script>
+  <script src="/modeler/script/pencil.js"></script>
+  <script src="/modeler/script/rectangle.js"></script>
+  <script src="/modeler/script/oval.js"></script>
   <script src="/modeler/script/app.js"></script>
 </head>
 <body onload="main(document.baseURI)">
@@ -18,9 +22,13 @@
       <canvas id="canvas"></canvas>
     </div>
     <div id="toolbar">
-      <button id="truck-button" type="button">Truck</button>
-      <button id="dolly-button" type="button">Dolly</button>
-      <button id="orbit-button" type="button">Orbit</button>
+      <button id="select-button" type="button"><img src="/modeler/image/select.svg" alt="Select"></button>
+      <button id="orbit-button" type="button"><img src="/modeler/image/orbit.svg" alt="Orbit"></button>
+      <button id="dolly-button" type="button"><img src="/modeler/image/dolly.svg" alt="Dolly"></button>
+      <button id="truck-button" type="button"><img src="/modeler/image/truck.svg" alt="Truck"></button>
+      <button id="pencil-button" type="button"><img src="/modeler/image/pencil.svg" alt="Pencil"></button>
+      <button id="rectangle-button" type="button"><img src="/modeler/image/rectangle.svg" alt="Rectangle"></button>
+      <button id="oval-button" type="button"><img src="/modeler/image/oval.svg" alt="Oval"></button>
     </div>
     <div id="controls">
       <button id="offer-button" type="button">Offer</button>
