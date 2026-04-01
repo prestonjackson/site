@@ -98,4 +98,53 @@ class Camera {
   setAspect(aspect) {
     this.aspect = aspect;
   }
+
+  /**
+   * Convert screen coordinates to world coordinates on a plane.
+   * Uses raycasting to find intersection with the plane.
+   * @param {number} screenX - Screen X coordinate (in pixels)
+   * @param {number} screenY - Screen Y coordinate (in pixels)
+   * @param {number} viewportWidth - Width of the viewport (in pixels)
+   * @param {number} viewportHeight - Height of the viewport (in pixels)
+   * @param {number} planeZ - Z coordinate of the intersection plane (default 0)
+   * @returns {Vec3|null} World position on the plane, or null if ray is parallel
+   */
+  screenToWorldOnPlane(screenX, screenY, viewportWidth, viewportHeight, planeZ = 0) {
+    // Convert screen coordinates to normalized device coordinates (-1 to 1)
+    const ndcX = (screenX / viewportWidth) * 2 - 1;
+    const ndcY = 1 - (screenY / viewportHeight) * 2;
+
+    // Create two points on the ray in NDC space
+    const ndcNear = new Vec3(ndcX, ndcY, -1);
+    const ndcFar = new Vec3(ndcX, ndcY, 1);
+
+    // Get camera matrices
+    const viewMatrix = this.getViewMatrix();
+    const projMatrix = this.getProjectionMatrix();
+
+    // Compute inverse of projection * view
+    const projViewMatrix = projMatrix.multiply(viewMatrix);
+    const invProjView = projViewMatrix.invert();
+
+    // Unproject NDC points to world space
+    const worldNear = invProjView.transformPoint(ndcNear);
+    const worldFar = invProjView.transformPoint(ndcFar);
+
+    // Ray from worldNear to worldFar
+    const rayDir = worldFar.subtract(worldNear).normalize();
+
+    // Find intersection with plane at z = planeZ
+    // Ray: P = worldNear + t * rayDir
+    // Plane: z = planeZ
+    // Solve: worldNear.z + t * rayDir.z = planeZ
+    if (Math.abs(rayDir.z) < 0.0001) {
+      // Ray is parallel to plane
+      return null;
+    }
+
+    const t = (planeZ - worldNear.z) / rayDir.z;
+    const intersection = worldNear.add(rayDir.scale(t));
+
+    return intersection;
+  }
 }

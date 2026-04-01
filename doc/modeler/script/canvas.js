@@ -13,35 +13,36 @@ class Canvas {
     this.uniformBuffer = null;
     this.bindGroup = null;
     this.frameRequested = false;
-
-    this.dirty = true;
   }
 
   async initialize() {
-    // Get WebGPU adapter and device
+    // Get WebGPU adapter (which reprents the GPU).
     this.adapter = await navigator.gpu.requestAdapter();
     if (!this.adapter) {
       throw new Error("WebGPU adapter not available");
     }
 
+    // Get device from adapter (represents a connection to the GPU).
     this.device = await this.adapter.requestDevice();
     if (!this.device) {
       throw new Error("WebGPU device not available");
     }
 
-    // Set device on model if provided
+    // Set device on model, if provided
     if (this.model) {
       this.model.device = this.device;
     }
 
-    // Get canvas context
+    // Get canvas context (which represents the drawing surface) and configure
+    // it for WebGPU.
     const context = this.native.getContext("webgpu");
     if (!context) {
       throw new Error("WebGPU context not available");
     }
     this.context = context;
 
-    // Configure context
+    // Configure context with device and preferred format. The format
+    // determines how colors are stored in the canvas texture.
     const format = navigator.gpu.getPreferredCanvasFormat();
     this.context.configure({
       device: this.device,
@@ -76,7 +77,8 @@ class Canvas {
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
-    // Create bind group layout
+    // Create bind group layout, which describes the resources
+    // (buffers, textures) that will be bound to the shader.
     const bindGroupLayout = this.device.createBindGroupLayout({
       entries: [
         {
@@ -105,7 +107,7 @@ class Canvas {
 
     // Create render pipeline
     this.renderPipeline = this.device.createRenderPipeline({
-      layout: pipelineLayout,
+      layout: pipelineLayout, // 
       vertex: {
         module: shaderModule,
         entryPoint: "vs_main",
@@ -145,7 +147,26 @@ class Canvas {
     }
   }
 
-  render = () => {
+  /**
+   * Convert screen coordinates to world coordinates on a plane (default z=0).
+   * Delegates to the camera's screenToWorldOnPlane method.
+   */
+  screenToWorldOnPlane(screenX, screenY, planeZ = 0) {
+    if (!this.model || !this.model.camera) {
+      return null;
+    }
+    return this.model.camera.screenToWorldOnPlane(
+      screenX,
+      screenY,
+      this.native.width,
+      this.native.height,
+      planeZ
+    );
+  }
+
+  render = (timestamp) => {
+    
+    
     // Update uniform buffer with camera matrices
     if (this.model && this.model.camera) {
       const camera = this.model.camera;
@@ -221,15 +242,5 @@ class Canvas {
 
     // Mark frame as no longer pending
     this.frameRequested = false;
-    
-    // Clear dirty flag now that we've rendered
-    if (this.model) {
-      this.model.dirty = false;
-    }
-
-    // Queue next frame if model becomes dirty again
-    if (this.model && this.model.dirty) {
-      this.requestRender();
-    }
   };
 }
