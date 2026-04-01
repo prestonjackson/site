@@ -5,8 +5,8 @@
  * Left-click and drag to define the oval bounds.
  */
 class Oval extends Tool {
-  constructor() {
-    super();
+  constructor(model = null) {
+    super(model);
     this.name = "Oval";
     this.isDrawing = false;
     this.startX = 0;

@@ -6,8 +6,9 @@
  * while active.
  */
 class Tool {
-  constructor() {
+  constructor(model = null) {
     this.name = "Tool";
+    this.model = model;
   }
 
   /**

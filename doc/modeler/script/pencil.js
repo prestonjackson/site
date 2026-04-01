@@ -5,8 +5,8 @@
  * Left-click and drag to draw.
  */
 class Pencil extends Tool {
-  constructor() {
-    super();
+  constructor(model = null) {
+    super(model);
     this.name = "Pencil";
     this.isDrawing = false;
     this.lastX = 0;

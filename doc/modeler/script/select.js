@@ -5,8 +5,8 @@
  * Left-click to select, drag to multi-select.
  */
 class Select extends Tool {
-  constructor() {
-    super();
+  constructor(model = null) {
+    super(model);
     this.name = "Select";
     this.isDragging = false;
     this.lastX = 0;

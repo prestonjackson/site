@@ -5,8 +5,8 @@
  * Left-click and drag to define the rectangle bounds.
  */
 class Rectangle extends Tool {
-  constructor() {
-    super();
+  constructor(model = null) {
+    super(model);
     this.name = "Rectangle";
     this.isDrawing = false;
     this.startX = 0;

@@ -19,6 +19,7 @@ class Application {
     this.connection = null;
     this.canvas = null;
     this.canvasElement = null;
+    this.model = null;
     this.activeTool = null;
     this.activeToolButton = null;
 
@@ -42,10 +43,21 @@ class Application {
   run() {
     console.log("Application run");
 
+    // Create a model to hold geometric data
+    // For now, we'll initialize it with a simple triangle to test
+    this.model = new Model(null); // Device will be set after Canvas initialization
+    
+    // Add some test geometry
+    const v0 = this.model.addVertex(-0.5, -0.5, 0);
+    const v1 = this.model.addVertex(0.5, -0.5, 0);
+    const v2 = this.model.addVertex(0, 0.5, 0);
+    this.model.addFace(v0, v1, v2);
+
     // Set up the canvas with WebGPU
     const canvasElement = document.getElementById("canvas");
     this.canvasElement = canvasElement;
-    this.canvas = new Canvas(canvasElement);
+    this.canvas = new Canvas(canvasElement, this.model);
+    this.model.canvas = this.canvas;  // Set canvas reference so model/tools can request renders
     this.canvas.initialize().catch(err => {
       console.error("Failed to initialize canvas:", err);
     });
@@ -170,37 +182,37 @@ class Application {
     let toolIcon = null;
     switch(toolName) {
       case 'select':
-        this.activeTool = new Select();
+        this.activeTool = new Select(this.model);
         this.activeToolButton = this.selectButton;
         toolIcon = '/modeler/image/select.svg';
         break;
       case 'orbit':
-        this.activeTool = new Orbit();
+        this.activeTool = new Orbit(this.model);
         this.activeToolButton = this.orbitButton;
         toolIcon = '/modeler/image/orbit.svg';
         break;
       case 'dolly':
-        this.activeTool = new Dolly();
+        this.activeTool = new Dolly(this.model);
         this.activeToolButton = this.dollyButton;
         toolIcon = '/modeler/image/dolly.svg';
         break;
       case 'truck':
-        this.activeTool = new Truck();
+        this.activeTool = new Truck(this.model);
         this.activeToolButton = this.truckButton;
         toolIcon = '/modeler/image/truck.svg';
         break;
       case 'pencil':
-        this.activeTool = new Pencil();
+        this.activeTool = new Pencil(this.model);
         this.activeToolButton = this.pencilButton;
         toolIcon = '/modeler/image/pencil.svg';
         break;
       case 'rectangle':
-        this.activeTool = new Rectangle();
+        this.activeTool = new Rectangle(this.model);
         this.activeToolButton = this.rectangleButton;
         toolIcon = '/modeler/image/rectangle.svg';
         break;
       case 'oval':
-        this.activeTool = new Oval();
+        this.activeTool = new Oval(this.model);
         this.activeToolButton = this.ovalButton;
         toolIcon = '/modeler/image/oval.svg';
         break;

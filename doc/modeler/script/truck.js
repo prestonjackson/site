@@ -5,8 +5,8 @@
  * Left-click and drag to pan the view horizontally and vertically.
  */
 class Truck extends Tool {
-  constructor() {
-    super();
+  constructor(model = null) {
+    super(model);
     this.name = "Truck";
     this.isDragging = false;
     this.lastX = 0;
@@ -30,6 +30,17 @@ class Truck extends Tool {
     
     const deltaX = event.clientX - this.lastX;
     const deltaY = event.clientY - this.lastY;
+    
+    // Scale movement by a sensitivity factor
+    const sensitivity = 0.002;
+    
+    if (this.model && this.model.camera) {
+      this.model.camera.truck(deltaX * sensitivity, -deltaY * sensitivity);
+      this.model.dirty = true;
+      if (this.model.canvas) {
+        this.model.canvas.requestRender();
+      }
+    }
     
     this._log(`dragging: delta (${deltaX}, ${deltaY})`);
     
