@@ -5,12 +5,13 @@
  * Left-click and drag to pan the view horizontally and vertically.
  */
 class Truck extends Tool {
-  constructor(model = null) {
-    super(model);
+  constructor(camera) {
+    super();
     this.name = "Truck";
     this.isDragging = false;
     this.lastX = 0;
     this.lastY = 0;
+    this.camera = camera;
   }
 
   activate() {
@@ -23,33 +24,35 @@ class Truck extends Tool {
     this.isDragging = true;
     this.lastX = event.clientX;
     this.lastY = event.clientY;
+
+    // No need to request render on mouse down
+    return false;
   }
 
   onMouseMove(event) {
     if (!this.isDragging) return;
     
+    super.onMouseMove(event);
     const deltaX = event.clientX - this.lastX;
     const deltaY = event.clientY - this.lastY;
     
     // Scale movement by a sensitivity factor
     const sensitivity = 0.002;
     
-    if (this.model && this.model.camera) {
-      this.model.camera.truck(deltaX * sensitivity, -deltaY * sensitivity);
-      this.model.dirty = true;
-      if (this.model.canvas) {
-        this.model.canvas.requestRender();
-      }
-    }
-    
-    this._log(`dragging: delta (${deltaX}, ${deltaY})`);
+    camera.truck(deltaX * sensitivity, -deltaY * sensitivity);
     
     this.lastX = event.clientX;
     this.lastY = event.clientY;
+
+    // Indicate that the model was modified, it's dirty.
+    return true; 
   }
 
   onMouseUp(event) {
     super.onMouseUp(event);
     this.isDragging = false;
+
+    // No need to request render on mouse up
+    return false; 
   }
 }

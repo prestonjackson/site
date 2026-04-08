@@ -5,8 +5,9 @@
  * Left-click and drag to orbit the camera around the focal point.
  */
 class Orbit extends Tool {
-  constructor(model = null) {
-    super(model);
+  constructor(camera) {
+    super();
+    this.camera = camera;
     this.name = "Orbit";
     this.isDragging = false;
     this.lastX = 0;
@@ -23,6 +24,8 @@ class Orbit extends Tool {
     this.isDragging = true;
     this.lastX = event.clientX;
     this.lastY = event.clientY;
+
+    return false;
   }
 
   onMouseMove(event) {
@@ -34,23 +37,18 @@ class Orbit extends Tool {
     // Scale movement by a sensitivity factor
     const sensitivity = 0.003;
     
-    if (this.model && this.model.camera) {
-      // Negative deltaY for vertical rotation (pitching)
-      this.model.camera.orbit(-deltaY * sensitivity, deltaX * sensitivity);
-      this.model.dirty = true;
-      if (this.model.canvas) {
-        this.model.canvas.requestRender();
-      }
-    }
-    
-    this._log(`dragging: delta (${deltaX}, ${deltaY})`);
+    this.model.camera.orbit(-deltaY * sensitivity, deltaX * sensitivity);
     
     this.lastX = event.clientX;
     this.lastY = event.clientY;
+
+    return true;
   }
 
   onMouseUp(event) {
     super.onMouseUp(event);
     this.isDragging = false;
+
+    return false;
   }
 }

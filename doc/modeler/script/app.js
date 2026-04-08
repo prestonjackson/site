@@ -17,9 +17,11 @@ class Application {
     this.id = "abcd";
 
     this.connection = null;
+
     this.canvas = null;
-    this.canvasElement = null;
+
     this.model = null;
+
     this.activeTool = null;
     this.activeToolButton = null;
 
@@ -45,7 +47,7 @@ class Application {
 
     // Create a model to hold geometric data
     // For now, we'll initialize it with a simple triangle to test
-    this.model = new Model(null); // Device will be set after Canvas initialization
+    this.model = new Model();
     
     // Add some test geometry
     const v0 = this.model.addVertex(-0.5, -0.5, 0);
@@ -55,15 +57,10 @@ class Application {
 
     // Set up the canvas with WebGPU
     const canvasElement = document.getElementById("canvas");
-    this.canvasElement = canvasElement;
-    this.canvas = new Canvas(canvasElement, this.model);
-    this.model.canvas = this.canvas;  // Set canvas reference so model/tools can request renders
+    this.canvas = new Canvas(canvasElement);
     this.canvas.initialize().catch(err => {
       console.error("Failed to initialize canvas:", err);
     });
-
-    // Set up the peer connection
-    this.connection =  new Connection(this.baseURI);
 
     // Set handlers for the toolbar buttons.
     this.selectButton = document.getElementById("select-button");
@@ -81,6 +78,9 @@ class Application {
     this.pencilButton.onclick = () => this.activateTool('pencil');
     this.rectangleButton.onclick = () => this.activateTool('rectangle');
     this.ovalButton.onclick = () => this.activateTool('oval');
+
+    // Set up the peer connection
+    this.connection =  new Connection(this.baseURI);
 
     // Set handlers for the control buttons.
     this.offerButton = document.getElementById("offer-button");
@@ -116,6 +116,18 @@ class Application {
     const dpr = window.devicePixelRatio || 1;
     canvasElement.width = canvasElement.clientWidth * dpr;
     canvasElement.height = canvasElement.clientHeight * dpr;
+  }
+
+  requestRender() {
+    if (!this.renderRequested) {
+      this.renderRequested = true;
+      requestAnimationFrame((timestamp) => {
+        if (this.canvas) {
+          this.canvas.drawFrame(timestamp);
+        }
+        this.renderRequested = false;
+      });
+    } 
   }
 
   // Handles clicks on the "Send" button by transmitting
@@ -182,37 +194,37 @@ class Application {
     let toolIcon = null;
     switch(toolName) {
       case 'select':
-        this.activeTool = new Select(this.model);
+        this.activeTool = new Select();
         this.activeToolButton = this.selectButton;
         toolIcon = '/modeler/image/select.svg';
         break;
       case 'orbit':
-        this.activeTool = new Orbit(this.model);
+        this.activeTool = new Orbit();
         this.activeToolButton = this.orbitButton;
         toolIcon = '/modeler/image/orbit.svg';
         break;
       case 'dolly':
-        this.activeTool = new Dolly(this.model);
+        this.activeTool = new Dolly();
         this.activeToolButton = this.dollyButton;
         toolIcon = '/modeler/image/dolly.svg';
         break;
       case 'truck':
-        this.activeTool = new Truck(this.model);
+        this.activeTool = new Truck();
         this.activeToolButton = this.truckButton;
         toolIcon = '/modeler/image/truck.svg';
         break;
       case 'pencil':
-        this.activeTool = new Pencil(this.model);
+        this.activeTool = new Pencil();
         this.activeToolButton = this.pencilButton;
         toolIcon = '/modeler/image/pencil.svg';
         break;
       case 'rectangle':
-        this.activeTool = new Rectangle(this.model);
+        this.activeTool = new Rectangle();
         this.activeToolButton = this.rectangleButton;
         toolIcon = '/modeler/image/rectangle.svg';
         break;
       case 'oval':
-        this.activeTool = new Oval(this.model);
+        this.activeTool = new Oval();
         this.activeToolButton = this.ovalButton;
         toolIcon = '/modeler/image/oval.svg';
         break;
@@ -227,8 +239,9 @@ class Application {
     this.activeToolButton.classList.add('active');
 
     // Set custom cursor
-    if (toolIcon && this.canvasElement) {
-      this.canvasElement.style.cursor = `url('${toolIcon}') 12 12, auto`;
+    const canvasElement = document.getElementById("canvas");
+    if (toolIcon && canvasElement) {
+      canvasElement.style.cursor = `url('${toolIcon}') 12 12, auto`;
     }
 
     this.activeTool.activate();
@@ -237,21 +250,30 @@ class Application {
   // Forward mouse down events to the active tool
   onCanvasMouseDown(event) {
     if (this.activeTool) {
-      this.activeTool.onMouseDown(event);
+      const dirty = this.activeTool.onMouseDown(event);
+      if (dirty) {
+        this.requestRender();
+      }
     }
   }
 
   // Forward mouse move events to the active tool
   onCanvasMouseMove(event) {
     if (this.activeTool) {
-      this.activeTool.onMouseMove(event);
+      const dirty = this.activeTool.onMouseMove(event);
+      if (dirty) {
+        this.requestRender();
+      }
     }
   }
 
   // Forward mouse up events to the active tool
   onCanvasMouseUp(event) {
     if (this.activeTool) {
-      this.activeTool.onMouseUp(event);
+      const dirty = this.activeTool.onMouseUp(event);
+      if (dirty) {
+        this.requestRender();
+      }
     }
   }
 }

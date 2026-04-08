@@ -6,7 +6,8 @@
  */
 class Oval extends Tool {
   constructor(model = null) {
-    super(model);
+    super();
+    this.model = model;
     this.name = "Oval";
     this.isDrawing = false;
     this.startX = 0;
@@ -27,22 +28,30 @@ class Oval extends Tool {
     this.startY = event.clientY;
     this.lastX = event.clientX;
     this.lastY = event.clientY;
+
+    return false;
   }
 
   onMouseMove(event) {
     if (!this.isDrawing) return;
     
+    super.onMouseMove(event);
+
     const width = event.clientX - this.startX;
     const height = event.clientY - this.startY;
     
-    this._log(`drawing: size (${width}, ${height})`);
+    // TODO: Implement actual oval drawing logic here, using width and height to define the bounds of the oval.
     
     this.lastX = event.clientX;
     this.lastY = event.clientY;
+
+    return true;
   }
 
   onMouseUp(event) {
     super.onMouseUp(event);
     this.isDrawing = false;
+
+    return false;
   }
 }

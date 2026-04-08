@@ -6,54 +6,51 @@
  * while active.
  */
 class Tool {
-  constructor(model = null) {
+  constructor() {
     this.name = "Tool";
-    this.model = model;
   }
 
   /**
    * Called when this tool is activated (becomes the active tool).
    */
   activate() {
-    this._log("activated");
+    console.log("activated");
   }
 
   /**
    * Called when this tool is deactivated (another tool takes over or app closes).
    */
   deactivate() {
-    this._log("deactivated");
+    console.log("deactivated");
   }
 
   /**
    * Called when the mouse button is pressed on the canvas while this tool is active.
    * @param {MouseEvent} event - The mouse event
+   * @returns {boolean} - Return true if the event caused a change that requires re-rendering
    */
   onMouseDown(event) {
-    this._log(`mouseDown at (${event.clientX}, ${event.clientY})`);
+    console.log(`mouseDown at (${event.clientX}, ${event.clientY})`);
+    return false;
   }
 
   /**
    * Called when the mouse moves on the canvas while this tool is active.
    * @param {MouseEvent} event - The mouse event
+   * @return {boolean} - Return true if the event caused a change that requires re-rendering
    */
   onMouseMove(event) {
-    this._log(`mouseMove at (${event.clientX}, ${event.clientY})`);
+    console.log(`mouseMove at (${event.clientX}, ${event.clientY})`);
+    return false;
   }
 
   /**
    * Called when the mouse button is released while this tool is active.
    * @param {MouseEvent} event - The mouse event
+   * @returns {boolean} - Return true if the event caused a change that requires re-rendering
    */
   onMouseUp(event) {
-    this._log(`mouseUp at (${event.clientX}, ${event.clientY})`);
-  }
-
-  /**
-   * Helper method to log messages with the tool's name.
-   * @param {string} message - The message to log
-   */
-  _log(message) {
-    console.log(`[${this.name}] ${message}`);
+    console.log(`mouseUp at (${event.clientX}, ${event.clientY})`);
+    return false;
   }
 }
