@@ -12,4 +12,4 @@ My goals:
 
 There is a real possiblity that at the end of this experiment, the whole site will be running React and Typescript. But for now, we're starting with the basics. The Web platform has come a long way since my last attempt and it is quite exciting to start again.
 
-So, this is an effort to practice my craft, working with simple tools, for my own learning and pleasure. I hope the lessons I share are helpful to you too.
+So, this is an effort to practice my craft, working with simple tools, for my own learning and pleasure.

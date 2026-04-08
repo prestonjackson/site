@@ -8,7 +8,7 @@
 
 ## Co-Developing
 
-I develop on my trusty MacBook Pro (Retina, 13-inch, Early-2015). Yes, the battery life is down to two hours. Yes, the rubber feet are missing. And yes, the system software is stuck at macOS Monterey (last updated in July of 2024). But I love this machine, and even if it is past its pull date, it still does the job. I wonder if it has become a representation of myself in the computer industry.
+I develop on my trusty MacBook Pro (Retina, 13-inch, Early-2015). Yes, the battery life is down to two hours. Yes, the rubber feet are missing. And yes, the system software is stuck at macOS Monterey (last updated in July of 2024). But I love this machine, and even if it is past its pull date, it still does the job.
 
 What is great is this MacBook comes pre-installed with Apache2, making it simple to develop locally, then move the configuration to my cloud server. The Xcode command line tools also provide a similar installation to the machine I'll be developing on.
 
