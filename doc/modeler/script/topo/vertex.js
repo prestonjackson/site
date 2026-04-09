@@ -1,27 +1,43 @@
 "use strict";
 
+import { Point } from "../math/point.js";
+import { Vec3 } from "../math/vec3.js";
+
 /**
  * Vertex - represents a point in 3D space.
  */
 class Vertex {
-  constructor(position) {
-    // position should be a vec3
-    this.position = position;
+  constructor(point) {
+    this._id = new Id();
+
+    // position should be a Point
+    this._point = point instanceof Vec3 ? new Point(point) : point;
   }
 
   /**
    * Get the position of this vertex.
-   * @returns {vec3} The position vector
+   * @returns {Point} The position vector
    */
-  getPosition() {
-    return this.position;
+  get point() {
+    return this._point;
   }
 
   /**
    * Set the position of this vertex.
-   * @param {vec3} position - The new position
+   * @param {Point} point - The new position
    */
-  setPosition(position) {
-    this.position = position;
+  set point(point) {
+    this._point = point instanceof Vec3 ? new Point(point) : point;
+  }
+
+  /**
+   * @returns {Id}
+   */
+  get id() {
+    return this._id;
+  }
+
+  set id(value) {
+    this._id = value;
   }
 }

@@ -1,124 +1,70 @@
 "use strict";
 
+import { Topology } from "./topology.js";
+import { Camera } from "./camera.js";
+import { Grid } from "./grid.js";
+
 /**
- * Model class - contains persistent data including topology, camera, and render buffers.
- * Separates geometric structure from rendering and tool interaction state.
+ * Model class - contains persistent data including topology, camera, and
+ * render buffers. Separates geometric structure from rendering and tool
+ * interaction state.
+ * 
+ * Also contains the top-level API for interacting with the model. Other
+ * classes (tools, renderers) should interact with the model through this API,
+ * rather than directly accessing the topology or GPU buffers.
  */
 class Model {
-  constructor(device) {
-    this.device = device;
-
+  constructor() {
     // Topological data (geometric structure)
     this.topology = new Topology();
-
-    // GPU buffers
-    this.vertexBuffer = null;
-    this.edgeIndexBuffer = null;
-    this.faceIndexBuffer = null;
-
-    // Vertex counts for drawing
-    this.vertexCount = 0;
-    this.edgeCount = 0;
-    this.faceCount = 0;
 
     // Camera for view/projection matrices
     this.camera = new Camera();
 
-    // Reference to canvas for render requests
-    this.canvas = null;
+    // Grid data (for rendering a reference grid)
+    this.grid = new Grid();
   }
 
   /**
    * Add a vertex to the model (delegates to topology).
-   * @param {number} x
-   * @param {number} y
-   * @param {number} z
-   * @returns {number} The index of the added vertex
+   * @param {Point} p - The position of the vertex to add
+   * @returns {Id} The ID of the added vertex
    */
-  addVertex(x, y, z) {
-    return this.topology.addVertex(x, y, z);
+  addVertex(p) {
+    return this.topology.createVertex(p);
   }
 
   /**
    * Add an edge between two vertices (delegates to topology).
-   * @param {number} v1 - First vertex index
-   * @param {number} v2 - Second vertex index
+   * @param {Array<Id>} vertexIds - Array of two vertex IDs
+   * @returns {Id} The ID of the added edge
    */
-  addEdge(v1, v2) {
-    this.topology.addEdge(v1, v2);
+  addEdge(vertexIds) {
+    return this.topology.createEdge(vertexIds);
   }
 
   /**
    * Add a triangular face (delegates to topology).
-   * @param {number} v1 - First vertex index
-   * @param {number} v2 - Second vertex index
-   * @param {number} v3 - Third vertex index
+   * @param {Array<Id>} edgeIds - Array of three edge IDs
+   * @returns {Id} The ID of the added face
    */
-  addFace(v1, v2, v3) {
-    this.topology.addFace(v1, v2, v3);
+  addFace(edgeIds) {
+    return this.topology.createFace(edgeIds);
   }
 
   /**
-   * Upload the model data to GPU buffers.
-   * Called before rendering.
-   * Uploads topology data to GPU buffers.
-   * Called before rendering.
-   */
-  uploadToGPU() {
-    // Upload vertices
-    if (this.topology.vertices.length > 0) {
-      const vertexData = new Float32Array(this.topology.vertices);
-      this.vertexBuffer = this.device.createBuffer({
-        size: vertexData.byteLength,
-        usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
-        mappedAtCreation: true,
-      });
-      new Float32Array(this.vertexBuffer.getMappedRange()).set(vertexData);
-      this.vertexBuffer.unmap();
-      this.vertexCount = this.topology.vertices.length / 3;
-    }
-
-    // Upload edges as index buffer
-    if (this.topology.edges.length > 0) {
-      const edgeData = new Uint32Array(this.topology.edges);
-      this.edgeIndexBuffer = this.device.createBuffer({
-        size: edgeData.byteLength,
-        usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
-        mappedAtCreation: true,
-      });
-      new Uint32Array(this.edgeIndexBuffer.getMappedRange()).set(edgeData);
-      this.edgeIndexBuffer.unmap();
-      this.edgeCount = this.topology.edges.length / 2;
-    }
-
-    // Upload faces as index buffer
-    if (this.topology.faces.length > 0) {
-      const faceData = new Uint32Array(this.topology.faces);
-      this.faceIndexBuffer = this.device.createBuffer({
-        size: faceData.byteLength,
-        usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
-        mappedAtCreation: true,
-      });
-      new Uint32Array(this.faceIndexBuffer.getMappedRange()).set(faceData);
-      this.faceIndexBuffer.unmap();
-      this.faceCount = this.topology
-    }
+   * Get the view matrix from the camera for rendering.
+   * @returns {mat4} The 4x4 view matrix as a flat array
+  */
+  getViewMatrix() {
+    return this.camera.getViewMatrix();
   }
 
   /**
-   * Clear all geometric data.
+   * Get the projection matrix from the camera for rendering.
+   * @returns {mat4} The 4x4 projection matrix as a flat array
    */
-  clear() {
-    this.topology.clear();
-    this.vertexCount = 0;
-    this.edgeCount = 0;
-    this.faceCount = 0;
-  }
-
-  /**
-   * Get the camera
-   */
-  getCamera() {
-    return this.camera;
+  getProjectionMatrix() {
+    return this.camera.getProjectionMatrix();
   }
 }

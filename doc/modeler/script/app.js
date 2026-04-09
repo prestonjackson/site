@@ -50,10 +50,13 @@ class Application {
     this.model = new Model();
     
     // Add some test geometry
-    const v0 = this.model.addVertex(-0.5, -0.5, 0);
-    const v1 = this.model.addVertex(0.5, -0.5, 0);
-    const v2 = this.model.addVertex(0, 0.5, 0);
-    this.model.addFace(v0, v1, v2);
+    const v0 = this.model.addVertex(new Point(-0.5, -0.5, 0));
+    const v1 = this.model.addVertex(new Point(0.5, -0.5, 0));
+    const v2 = this.model.addVertex(new Point(0, 0.5, 0));
+    const e0 = this.model.addEdge([v0, v1]);
+    const e1 = this.model.addEdge([v1, v2]);
+    const e2 = this.model.addEdge([v2, v0]);
+    const f0 = this.model.addFace([e0, e1, e2]);
 
     // Set up the canvas with WebGPU
     const canvasElement = document.getElementById("canvas");
@@ -101,9 +104,12 @@ class Application {
     this.connection.onreceive = (message) => this.onReceiveMessage(message);
 
     // Register canvas mouse event listeners.
-    canvasElement.addEventListener('mousedown', (e) => this.onCanvasMouseDown(e));
-    canvasElement.addEventListener('mousemove', (e) => this.onCanvasMouseMove(e));
-    canvasElement.addEventListener('mouseup', (e) => this.onCanvasMouseUp(e));
+    canvasElement.addEventListener('mousedown',
+        (e) => this.onCanvasMouseDown(e));
+    canvasElement.addEventListener('mousemove',
+        (e) => this.onCanvasMouseMove(e));
+    canvasElement.addEventListener('mouseup',
+        (e) => this.onCanvasMouseUp(e));
 
     // Set up the canvas, get the resolution correct.
     window.addEventListener("resize", () => this.resizeCanvas());
@@ -122,9 +128,18 @@ class Application {
     if (!this.renderRequested) {
       this.renderRequested = true;
       requestAnimationFrame((timestamp) => {
-        if (this.canvas) {
-          this.canvas.drawFrame(timestamp);
-        }
+        const modelMatrix = this.model.getModelMatrix();
+        const viewMatrix = this.model.camera.getViewMatrix();
+        const projectionMatrix = this.model.camera.getProjectionMatrix();
+
+        const vertices = this.model.topology.vertices;
+        const edges = this.model.topology.edges;
+        const faces = this.model.topology.faces;
+
+        this.canvas.drawFrame(timestamp,
+            modelMatrix, viewMatrix, projectionMatrix,
+            vertices, edges, faces
+        );
         this.renderRequested = false;
       });
     } 
