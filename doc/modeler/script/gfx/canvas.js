@@ -2,12 +2,12 @@
 
 // Canvas class for WebGPU rendering
 class Canvas {
-  constructor(element, model) {
-    this.native = element;
-    this.model = model;
+  constructor(context) {
+    // The webgpu context from the canvas element.
+    this.context = context;
+
     this.adapter = null;
     this.device = null;
-    this.context = null;
     this.renderPipeline = null;
     this.vertexBufferLayout = null;
     this.uniformBuffer = null;
@@ -32,14 +32,6 @@ class Canvas {
     if (this.model) {
       this.model.device = this.device;
     }
-
-    // Get canvas context (which represents the drawing surface) and configure
-    // it for WebGPU.
-    const context = this.native.getContext("webgpu");
-    if (!context) {
-      throw new Error("WebGPU context not available");
-    }
-    this.context = context;
 
     // Configure context with device and preferred format. The format
     // determines how colors are stored in the canvas texture.
@@ -165,32 +157,32 @@ class Canvas {
   }
 
   render = (timestamp) => {
-    
-    
+
+
     // Update uniform buffer with camera matrices
     if (this.model && this.model.camera) {
       const camera = this.model.camera;
-      
+
       // Set canvas aspect ratio
       camera.setAspect(this.native.width / this.native.height);
-      
+
       // Get matrices from camera
       const viewMatrix = camera.getViewMatrix();
       const projMatrix = camera.getProjectionMatrix();
-      
+
       // Create uniform data buffer (2 mat4x4 = 32 floats = 128 bytes)
       const uniformData = new Float32Array(32);
-      
+
       // Copy view matrix (column-major)
       for (let i = 0; i < 16; i++) {
         uniformData[i] = viewMatrix.data[i];
       }
-      
+
       // Copy projection matrix (column-major)
       for (let i = 0; i < 16; i++) {
         uniformData[16 + i] = projMatrix.data[i];
       }
-      
+
       // Write to uniform buffer
       this.device.queue.writeBuffer(this.uniformBuffer, 0, uniformData);
     }
@@ -210,7 +202,7 @@ class Canvas {
     });
 
     renderPass.setPipeline(this.renderPipeline);
-    
+
     // Bind uniform group
     if (this.bindGroup) {
       renderPass.setBindGroup(0, this.bindGroup);

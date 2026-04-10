@@ -2,6 +2,7 @@
 
 import { Point } from "../math/point.js";
 import { Vec3 } from "../math/vec3.js";
+import { Id } from "../util/id.js";
 
 /**
  * Vertex - represents a point in 3D space.

@@ -48,22 +48,33 @@ class Application {
     // Create a model to hold geometric data
     // For now, we'll initialize it with a simple triangle to test
     this.model = new Model();
-    
-    // Add some test geometry
-    const v0 = this.model.addVertex(new Point(-0.5, -0.5, 0));
-    const v1 = this.model.addVertex(new Point(0.5, -0.5, 0));
-    const v2 = this.model.addVertex(new Point(0, 0.5, 0));
-    const e0 = this.model.addEdge([v0, v1]);
-    const e1 = this.model.addEdge([v1, v2]);
-    const e2 = this.model.addEdge([v2, v0]);
-    const f0 = this.model.addFace([e0, e1, e2]);
+    this.model.insertTestGeometry();
 
     // Set up the canvas with WebGPU
     const canvasElement = document.getElementById("canvas");
-    this.canvas = new Canvas(canvasElement);
+    const context = canvasElement.getContext("webgpu");
+    if (!context) {
+      console.error("WebGPU context not available");
+    }
+    this.canvas = new Canvas(context);
     this.canvas.initialize().catch(err => {
       console.error("Failed to initialize canvas:", err);
     });
+
+    // Register canvas mouse event listeners.
+    canvasElement.addEventListener('mousedown',
+      (e) => this.onCanvasMouseDown(e));
+    canvasElement.addEventListener('mousemove',
+      (e) => this.onCanvasMouseMove(e));
+    canvasElement.addEventListener('mouseup',
+      (e) => this.onCanvasMouseUp(e));
+
+    // Set up the canvas, get the resolution correct.
+    window.addEventListener("resize", () => this.resizeCanvas());
+    this.resizeCanvas();
+
+    // Set up the peer connection
+    this.connection = new Connection(this.baseURI);
 
     // Set handlers for the toolbar buttons.
     this.selectButton = document.getElementById("select-button");
@@ -81,9 +92,6 @@ class Application {
     this.pencilButton.onclick = () => this.activateTool('pencil');
     this.rectangleButton.onclick = () => this.activateTool('rectangle');
     this.ovalButton.onclick = () => this.activateTool('oval');
-
-    // Set up the peer connection
-    this.connection =  new Connection(this.baseURI);
 
     // Set handlers for the control buttons.
     this.offerButton = document.getElementById("offer-button");
@@ -103,17 +111,6 @@ class Application {
 
     this.connection.onreceive = (message) => this.onReceiveMessage(message);
 
-    // Register canvas mouse event listeners.
-    canvasElement.addEventListener('mousedown',
-        (e) => this.onCanvasMouseDown(e));
-    canvasElement.addEventListener('mousemove',
-        (e) => this.onCanvasMouseMove(e));
-    canvasElement.addEventListener('mouseup',
-        (e) => this.onCanvasMouseUp(e));
-
-    // Set up the canvas, get the resolution correct.
-    window.addEventListener("resize", () => this.resizeCanvas());
-    this.resizeCanvas();
   }
 
   // Resize the canvas to fit its container.
@@ -132,17 +129,17 @@ class Application {
         const viewMatrix = this.model.camera.getViewMatrix();
         const projectionMatrix = this.model.camera.getProjectionMatrix();
 
-        const vertices = this.model.topology.vertices;
-        const edges = this.model.topology.edges;
-        const faces = this.model.topology.faces;
+        const points = this.model.topology.points;
+        const lines = this.model.topology.lines;
+        const triangles = this.model.topology.faces;
 
         this.canvas.drawFrame(timestamp,
-            modelMatrix, viewMatrix, projectionMatrix,
-            vertices, edges, faces
+          modelMatrix, viewMatrix, projectionMatrix,
+          points, lines, triangles
         );
         this.renderRequested = false;
       });
-    } 
+    }
   }
 
   // Handles clicks on the "Send" button by transmitting
@@ -150,7 +147,7 @@ class Application {
   onSendMessage() {
     var message = this.messageInputBox.value;
     this.connection.send(message);
-    
+
     // Clear the input box and re-focus it, so that we're
     // ready for the next message.
     this.messageInputBox.value = "";
@@ -162,7 +159,7 @@ class Application {
   onReceiveMessage(message) {
     var element = document.createElement("p");
     var textNode = document.createTextNode(message);
-    
+
     element.appendChild(textNode);
     this.receiveBox.appendChild(element);
   }
@@ -171,7 +168,7 @@ class Application {
   onReceiveChannelStatusChange(event) {
     if (this.receiveChannel) {
       console.log("Receive channel's status has changed to " +
-                  this.receiveChannel.readyState);
+        this.receiveChannel.readyState);
     }
     // Here you would do stuff that needs to be done
     // when the channel's status changes.
@@ -189,7 +186,7 @@ class Application {
     this.connectButton.disabled = false;
     this.disconnectButton.disabled = true;
     this.sendButton.disabled = true;
- 
+
     this.messageInputBox.value = "";
     this.messageInputBox.disabled = true;
   }
@@ -207,7 +204,7 @@ class Application {
 
     // Create and activate the new tool
     let toolIcon = null;
-    switch(toolName) {
+    switch (toolName) {
       case 'select':
         this.activeTool = new Select();
         this.activeToolButton = this.selectButton;

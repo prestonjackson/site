@@ -1,6 +1,6 @@
 "use strict";
 
-import { Id } from "./id.js";
+import { Id } from "../util/id.js";
 
 /**
  * Edge - represents a connection between two vertices.

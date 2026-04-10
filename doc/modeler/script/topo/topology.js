@@ -1,9 +1,9 @@
 "use strict";
 
-import { Id } from "./topo/id.js";
-import { Vertex } from "./topo/vertex.js";
-import { Edge } from "./topo/edge.js";
-import { Face } from "./topo/face.js";
+import { Id } from "../util/id.js";
+import { Vertex } from "./vertex.js";
+import { Edge } from "./edge.js";
+import { Face } from "./face.js";
 
 /**
  * Topology class - contains the geometric structure using Vertex, Edge, and Face objects.
