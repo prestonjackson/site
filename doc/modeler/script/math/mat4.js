@@ -1,12 +1,28 @@
+// @ts-check
 "use strict";
+
+import { Vec3 } from "./vec3.js";
 
 /**
  * Mat4 - 4x4 matrix class optimized for WebGPU
  * Stored in column-major order (WebGPU standard)
  */
-class Mat4 {
+export class Mat4 {
+  /** @type {Float32Array} */
+  data;
+
+  /**
+   * @param {Float32Array|number[]|null} [data]
+   */
   constructor(data = null) {
-    if (data instanceof Float32Array) {
+    if (data && !(data instanceof Float32Array) && !Array.isArray(data)) {
+      throw new TypeError("Mat4 data must be a Float32Array or Array");
+    }
+    if (data && data.length !== 16) {
+      throw new Error("Mat4 data must have 16 elements");
+    }
+
+    if (data) {
       this.data = new Float32Array(data);
     } else {
       // Initialize as identity matrix
@@ -16,6 +32,17 @@ class Mat4 {
       this.data[10] = 1;
       this.data[15] = 1;
     }
+  }
+
+  /**
+   * Create a scaling matrix
+   */
+  static scale(x, y, z) {
+    const mat = new Mat4();
+    mat.data[0] = x;
+    mat.data[5] = y;
+    mat.data[10] = z;
+    return mat;
   }
 
   clone() {
@@ -182,7 +209,7 @@ class Mat4 {
     const oneMinusCos = 1 - cos;
 
     const mat = new Mat4();
-    
+
     mat.data[0] = cos + a.x * a.x * oneMinusCos;
     mat.data[1] = a.z * sin + a.y * a.x * oneMinusCos;
     mat.data[2] = a.y * (-sin) + a.z * a.x * oneMinusCos;

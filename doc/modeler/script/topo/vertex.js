@@ -1,3 +1,4 @@
+// @ts-check
 "use strict";
 
 import { Point } from "../math/point.js";
@@ -7,38 +8,48 @@ import { Id } from "../util/id.js";
 /**
  * Vertex - represents a point in 3D space.
  */
-class Vertex {
-  constructor(point) {
-    this._id = new Id();
+export class Vertex {
+  /** @type {Id} */
+  #id;
+  /** @type {Point} */
+  #point;
 
-    // position should be a Point
-    this._point = point instanceof Vec3 ? new Point(point) : point;
+  /** @param {Point|Vec3} point */
+  constructor(point) {
+    if (!(point instanceof Point) && !(point instanceof Vec3)) {
+      throw new TypeError("Vertex must be initialized with a Point or Vec3");
+    }
+    this.#id = new Id();
+    this.#point = point instanceof Vec3 ? new Point(point) : point;
   }
 
   /**
    * Get the position of this vertex.
-   * @returns {Point} The position vector
+   * @returns {Point}
    */
   get point() {
-    return this._point;
+    return this.#point;
   }
 
   /**
    * Set the position of this vertex.
-   * @param {Point} point - The new position
+   * @param {Point} point
    */
   set point(point) {
-    this._point = point instanceof Vec3 ? new Point(point) : point;
+    this.#point = point instanceof Vec3 ? new Point(point) : point;
   }
 
   /**
    * @returns {Id}
    */
   get id() {
-    return this._id;
+    return this.#id;
   }
 
+  /**
+   * @param {Id} value
+   */
   set id(value) {
-    this._id = value;
+    this.#id = value;
   }
 }

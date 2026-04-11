@@ -2,14 +2,15 @@
 
 "use strict";
 
-class Signaler {
+export class Signaler {
+  #url;
   constructor(url) {
-    this.url = url;
+    this.#url = url;
   }
 
   async postMessage(data) {
     try {
-      const response = await fetch(this.url, {
+      const response = await fetch(this.#url, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -28,7 +29,7 @@ class Signaler {
 
   async getMessage() {
     try {
-      const response = await fetch(this.url, {
+      const response = await fetch(this.#url, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",

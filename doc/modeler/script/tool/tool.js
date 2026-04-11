@@ -1,3 +1,4 @@
+// @ts-check
 "use strict";
 
 /**
@@ -5,7 +6,10 @@
  * Tools are activated/deactivated and receive mouse events (down, move, up)
  * while active.
  */
-class Tool {
+export class Tool {
+  /** @type {string} */
+  name;
+
   constructor() {
     this.name = "Tool";
   }

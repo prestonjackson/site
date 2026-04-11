@@ -3,30 +3,9 @@
 <head>
   <title>Preston Jackson</title>
 <!--#include virtual="/template/head.html" -->
-  <script src="/modeler/script/util/signaler.js"></script>
-  <script src="/modeler/script/util/connection.js"></script>
-  <script src="/modeler/script/gfx/canvas.js"></script>
-  <script src="/modeler/script/topo/vertex.js"></script>
-  <script src="/modeler/script/topo/edge.js"></script>
-  <script src="/modeler/script/topo/face.js"></script>
-  <script src="/modeler/script/topo/topology.js"></script>
-  <script src="/modeler/script/model/grid.js"></script>
-  <script src="/modeler/script/model/model.js"></script>
-  <script src="/modeler/script/math/vec3.js"></script>
-  <script src="/modeler/script/math/point.js"></script>
-  <script src="/modeler/script/math/mat4.js"></script>
-  <script src="/modeler/script/model/camera.js"></script>
-  <script src="/modeler/script/tool/tool.js"></script>
-  <script src="/modeler/script/tool/select.js"></script>
-  <script src="/modeler/script/tool/orbit.js"></script>
-  <script src="/modeler/script/tool/dolly.js"></script>
-  <script src="/modeler/script/tool/truck.js"></script>
-  <script src="/modeler/script/tool/pencil.js"></script>
-  <script src="/modeler/script/tool/rectangle.js"></script>
-  <script src="/modeler/script/tool/oval.js"></script>
-  <script src="/modeler/script/app.js"></script>
+  <script type="module" src="/modeler/script/app.js"></script>
 </head>
-<body onload="main(document.baseURI)">
+<body>
   <div id="content">
     <div id="surface">
       <canvas id="canvas"></canvas>

@@ -1,14 +1,38 @@
+// @ts-check
 "use strict";
+
+import { Vec3 } from "../math/vec3.js";
+import { Mat4 } from "../math/mat4.js";
 
 /**
  * Camera - Manages view and projection matrices with truck, dolly, and orbit operations
  */
-class Camera {
+export class Camera {
+  /** @type {Vec3} */
+  position;
+  /** @type {Vec3} */
+  target;
+  /** @type {Vec3} */
+  up;
+  /** @type {number} */
+  fov;
+  /** @type {number} */
+  aspect;
+  /** @type {number} */
+  near;
+  /** @type {number} */
+  far;
+
+  /**
+   * @param {Vec3|null} [position]
+   * @param {Vec3|null} [target]
+   * @param {Vec3|null} [up]
+   */
   constructor(position = null, target = null, up = null) {
     this.position = position || new Vec3(0, 0, 2);
     this.target = target || new Vec3(0, 0, 0);
     this.up = up || new Vec3(0, 1, 0);
-    
+
     this.fov = Math.PI / 4; // 45 degrees
     this.aspect = 1.0;
     this.near = 0.1;
@@ -21,16 +45,16 @@ class Camera {
   truck(dx, dy) {
     // Get the forward vector (from eye to target)
     const forward = this.target.subtract(this.position).normalize();
-    
+
     // Get the right vector
     const right = forward.cross(this.up).normalize();
-    
+
     // Get the actual up vector (perpendicular to both forward and right)
     const actualUp = right.cross(forward).normalize();
-    
+
     // Move camera and target by the same amount
     const movement = right.scale(dx).add(actualUp.scale(dy));
-    
+
     this.position = this.position.add(movement);
     this.target = this.target.add(movement);
   }
@@ -41,7 +65,7 @@ class Camera {
   dolly(distance) {
     const direction = this.target.subtract(this.position).normalize();
     const movement = direction.scale(distance);
-    
+
     this.position = this.position.add(movement);
     this.target = this.target.add(movement);
   }
@@ -52,19 +76,19 @@ class Camera {
   orbit(angleX, angleY) {
     // Vector from target to camera
     let offset = this.position.subtract(this.target);
-    
+
     // Rotate around Y axis (horizontal)
     let rotY = Mat4.rotateY(angleY);
     offset = rotY.transformPoint(offset);
-    
+
     // Rotate around the local right axis (vertical)
     let right = offset.normalize().cross(this.up).normalize();
     let rotX = Mat4.rotateAxis(right, angleX);
     offset = rotX.transformPoint(offset);
-    
+
     // Update position
     this.position = this.target.add(offset);
-    
+
     // Keep up vector consistent
     this.up = new Vec3(0, 1, 0);
   }

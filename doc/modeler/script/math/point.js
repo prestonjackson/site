@@ -1,9 +1,20 @@
+// @ts-check
 "use strict";
+
+import { Vec3 } from "./vec3.js";
 
 /**
  * Point - lightweight wrapper around Vec3 for semantic 3D positions.
  */
-class Point {
+export class Point {
+  /** @type {Vec3} */
+  position;
+
+  /**
+   * @param {Point|Vec3|number} x 
+   * @param {number} [y] 
+   * @param {number} [z] 
+   */
   constructor(x = 0, y = 0, z = 0) {
     if (x instanceof Point) {
       this.position = x.position.clone();

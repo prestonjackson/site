@@ -1,39 +1,40 @@
+// @ts-check
 "use strict";
 
 import { Id } from "../util/id.js";
 import { Vertex } from "./vertex.js";
 import { Edge } from "./edge.js";
 import { Face } from "./face.js";
+import { Point } from "../math/point.js";
 
 /**
  * Topology class - contains the geometric structure using Vertex, Edge, and Face objects.
  * Manages topological elements independent of rendering or visualization.
  */
-class Topology {
-  constructor() {
-    this.vertices = {};  // Map of Vertex objects
-    this.edges = {};     // Map of Edge objects
-    this.faces = {};     // Map of Face objects
-  }
+export class Topology {
+  /** @type {Map<Id, Vertex>} */
+  #vertices = new Map();
+  /** @type {Map<Id, Edge>} */
+  #edges = new Map();
+  /** @type {Map<Id, Face>} */
+  #faces = new Map();
 
   /**
    * Add a vertex to the topology.
-   * @param {Point} point - The position in 3D space
-   * @returns {Id} The ID of the added vertex
+   * @param {Point} point @returns {Id}
    */
   createVertex(point) {
     const vertex = new Vertex(point);
-    this.vertices[vertex.id] = vertex;
+    this.#vertices.set(vertex.id, vertex);
     return vertex.id;
   }
 
   /**
    * Get a vertex by index.
-   * @param {Id} id - The vertex ID
-   * @returns {Vertex} The vertex with the specified ID
+   * @param {Id} id @returns {Vertex}
    */
   readVertex(id) {
-    const vertex = this.vertices[id];
+    const vertex = this.#vertices.get(id);
     if (vertex) {
       return vertex;
     }
@@ -42,9 +43,7 @@ class Topology {
 
   /**
    * Update a vertex's position.
-   * @param {Id} id - The vertex ID
-   * @param {Point} point - The new position in 3D space
-   * @returns {Id} The updated vertex's ID
+   * @param {Id} id  @param {Point} point @returns {Id}
    */
   updateVertex(id, point) {
     const vertex = this.readVertex(id);
@@ -54,32 +53,29 @@ class Topology {
 
   /**
    * Delete a vertex by ID.
-   * @param {Id} id - The vertex ID to delete
-   * @return {Id} The ID of the deleted vertex
+   * @param {Id} id @return {Id}
    */
   deleteVertex(id) {
-    delete this.vertices[id];
+    this.#vertices.delete(id);
     return id;
   }
 
   /**
    * Create an edge between two vertices.
-   * @param {Array<Id>} vertexIds - Array of two vertex IDs
-   * @returns {Id} The created edge's ID
+   * @param {Array<Id>} vertexIds @returns {Id}
    */
   createEdge(vertexIds) {
     const edge = new Edge(vertexIds);
-    this.edges[edge.id] = edge;
+    this.#edges.set(edge.id, edge);
     return edge.id;
   }
 
   /**
    * Read an edge by ID.
-   * @param {Id} id - The edge ID
-   * @returns {Edge} The edge with the specified ID
+   * @param {Id} id @returns {Edge}
    */
   readEdge(id) {
-    const edge = this.edges[id];
+    const edge = this.#edges.get(id);
     if (edge) {
       return edge;
     }
@@ -88,9 +84,7 @@ class Topology {
 
   /**
    * Update an edge's connected vertices.
-   * @param {Id} id - The edge ID
-   * @param {Array<Id>} vertexIds - New array of two vertex IDs
-   * @returns {Id} The edge ID
+   * @param {Id} id @param {Array<Id>} vertexIds @returns {Id}
    */
   updateEdge(id, vertexIds) {
     const edge = this.readEdge(id);
@@ -100,37 +94,34 @@ class Topology {
 
   /**
    * Delete an edge by ID.
-   * @param {Id} id - The edge ID to delete
-   * @return {Id} The ID of the deleted edge
+   * @param {Id} id @return {Id}
    */
   deleteEdge(id) {
-    delete this.edges[id];
+    this.#edges.delete(id);
     return id;
   }
-  
+
   /**
    * Create a face from an array of edges.
-   * @param {Array<Id>} edgeIds - Array of edge IDs (minimum 3)
-   * @returns {Id} The created face ID
+   * @param {Array<Id>} edgeIds @returns {Id}
    */
   createFace(edgeIds) {
     if (!Array.isArray(edgeIds) || edgeIds.length < 3) {
       throw new Error("Face requires an array of at least 3 edge IDs");
     }
-    
+
     const edges = edgeIds.map(id => this.readEdge(id));
     const face = new Face(edges);
-    this.faces[face.id] = face;
+    this.#faces.set(face.id, face);
     return face.id;
   }
 
   /**
    * Read a face by ID.
-   * @param {Id} id - The face ID
-   * @returns {Face} The face with the specified ID
+   * @param {Id} id @returns {Face}
    */
   readFace(id) {
-    const face = this.faces[id];
+    const face = this.#faces.get(id);
     if (face) {
       return face;
     }
@@ -139,14 +130,10 @@ class Topology {
 
   /**
    * Update a face's edges.
-   * @param {Id} id - The face ID
-   * @param {Array<Id>} edgeIds - New array of edge IDs
-   * @returns {Id} The face ID
+   * @param {Id} id @param {Array<Id>} edgeIds @returns {Id}
    */
   updateFace(id, edgeIds) {
     const face = this.readFace(id);
-    face.id = id; // Ensure ID matches, though usually fixed
-    // Assuming Face setter for edges exists
     const edges = edgeIds.map(eId => this.readEdge(eId));
     face.edges = edges;
     return face.id;
@@ -154,44 +141,47 @@ class Topology {
 
   /**
    * Delete a face by ID.
-   * @param {Id} id - The face ID to delete
-   * @returns {Id} The ID of the deleted face
+   * @param {Id} id @returns {Id}
    */
   deleteFace(id) {
-    delete this.faces[id];
+    this.#faces.delete(id);
     return id;
   }
 
+  get points() { return this.#vertices; }
+  get lines() { return this.#edges; }
+  get surfaces() { return this.#faces; }
+
   /**
    * Get the number of vertices.
-   * @returns {number} The vertex count
+   * @returns {number}
    */
   getVertexCount() {
-    return Object.keys(this.vertices).length;
+    return this.#vertices.size;
   }
 
   /**
    * Get the number of edges.
-   * @returns {number} The edge count
+   * @returns {number}
    */
   getEdgeCount() {
-    return Object.keys(this.edges).length;
+    return this.#edges.size;
   }
 
   /**
    * Get the number of faces.
-   * @returns {number} The face count
+   * @returns {number}
    */
   getFaceCount() {
-    return Object.keys(this.faces).length;
+    return this.#faces.size;
   }
 
   /**
    * Clear all topological data.
    */
   clear() {
-    this.vertices = {};
-    this.edges = {};
-    this.faces = {};
+    this.#vertices.clear();
+    this.#edges.clear();
+    this.#faces.clear();
   }
 }

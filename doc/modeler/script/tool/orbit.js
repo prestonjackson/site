@@ -1,53 +1,53 @@
-"use strict";
+import { Tool } from "./tool.js";
 
-/**
- * Orbit tool - rotates the camera around the focal point.
- * Left-click and drag to orbit the camera around the focal point.
- */
-class Orbit extends Tool {
+export class Orbit extends Tool {
+  #camera;
+  #isDragging = false;
+  #lastX = 0;
+  #lastY = 0;
+
   constructor(camera) {
     super();
-    this.camera = camera;
+    this.#camera = camera;
     this.name = "Orbit";
-    this.isDragging = false;
-    this.lastX = 0;
-    this.lastY = 0;
   }
 
   activate() {
     super.activate();
-    this.isDragging = false;
+    this.#isDragging = false;
   }
 
   onMouseDown(event) {
     super.onMouseDown(event);
-    this.isDragging = true;
-    this.lastX = event.clientX;
-    this.lastY = event.clientY;
+    this.#isDragging = true;
+    this.#lastX = event.clientX;
+    this.#lastY = event.clientY;
 
     return false;
   }
 
   onMouseMove(event) {
-    if (!this.isDragging) return;
+    if (!this.#isDragging) return;
     
-    const deltaX = event.clientX - this.lastX;
-    const deltaY = event.clientY - this.lastY;
+    const deltaX = event.clientX - this.#lastX;
+    const deltaY = event.clientY - this.#lastY;
     
     // Scale movement by a sensitivity factor
     const sensitivity = 0.003;
     
-    this.model.camera.orbit(-deltaY * sensitivity, deltaX * sensitivity);
+    if (this.#camera) {
+      this.#camera.orbit(-deltaY * sensitivity, deltaX * sensitivity);
+    }
     
-    this.lastX = event.clientX;
-    this.lastY = event.clientY;
+    this.#lastX = event.clientX;
+    this.#lastY = event.clientY;
 
     return true;
   }
 
   onMouseUp(event) {
     super.onMouseUp(event);
-    this.isDragging = false;
+    this.#isDragging = false;
 
     return false;
   }

@@ -1,46 +1,61 @@
 "use strict";
 
+import { Topology } from "../topo/topology.js";
+import { Point } from "../math/point.js";
+import { Color } from "../math/color.js";
+import { Size2 } from "../math/size2.js";
+
 /**
  * Grid class - represents a reference grid for rendering in 3D space.
  * Generates vertex data for grid lines in the XY plane.
  */
-class Grid {
-  constructor(size = 10, divisions = 10) {
-    this.size = size;
-    this.divisions = divisions;
-    this.vertices = this.generateVertices();
+export class Grid {
+  #size;
+  #major;
+  #minor;
+  #color;
+  #topology;
+
+  constructor(size = new Size2(10, 10), major = 2, minor = 10) {
+    this.#size = size;  // The size of the grid
+    this.#major = major;  // The number of major divisions
+    this.#minor = minor;  // The number of minor divisions
+    this.#color = new Color(0.5, 0.5, 0.5, 1);
+
+    this.#topology = new Topology();
+    this.generateVertices();
   }
 
   /**
    * Generate vertices for the grid lines.
-   * Returns a Float32Array of positions (x, y, z) for line segments.
    */
   generateVertices() {
-    const vertices = [];
-    const step = this.size / this.divisions;
-    const halfSize = this.size / 2;
+    // For now, simplicity: use major divisions only
+    const step = this.#major;
+    const halfWidth = this.#size.w / 2;
+    const halfHeight = this.#size.h / 2;
 
-    // Horizontal lines (parallel to X-axis)
-    for (let i = 0; i <= this.divisions; i++) {
-      const y = -halfSize + i * step;
-      vertices.push(-halfSize, y, 0); // start
-      vertices.push(halfSize, y, 0);  // end
+    const divX = Math.floor(this.#size.w / step);
+    const divY = Math.floor(this.#size.h / step);
+
+    // Horizontal lines
+    for (let i = 0; i <= divY; i++) {
+      const y = -halfHeight + i * step;
+      const v1 = this.#topology.createVertex(new Point(-halfWidth, y, 0));
+      const v2 = this.#topology.createVertex(new Point(halfWidth, y, 0));
+      this.#topology.createEdge([v1, v2]);
     }
 
-    // Vertical lines (parallel to Y-axis)
-    for (let i = 0; i <= this.divisions; i++) {
-      const x = -halfSize + i * step;
-      vertices.push(x, -halfSize, 0); // start
-      vertices.push(x, halfSize, 0);  // end
+    // Vertical lines
+    for (let i = 0; i <= divX; i++) {
+      const x = -halfWidth + i * step;
+      const v1 = this.#topology.createVertex(new Point(x, -halfHeight, 0));
+      const v2 = this.#topology.createVertex(new Point(x, halfHeight, 0));
+      this.#topology.createEdge([v1, v2]);
     }
-
-    return new Float32Array(vertices);
   }
 
-  /**
-   * Get the number of vertices (each line segment has 2 vertices).
-   */
-  getVertexCount() {
-    return this.vertices.length / 3; // 3 components per vertex
+  get topology() {
+    return this.#topology;
   }
 }

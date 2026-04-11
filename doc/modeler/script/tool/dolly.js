@@ -1,50 +1,51 @@
-"use strict";
+import { Tool } from "./tool.js";
 
-/**
- * Dolly tool - moves the camera closer or farther from the focal point.
- * Left-click and drag up to dolly out (zoom out), drag down to dolly in (zoom in).
- */
-class Dolly extends Tool {
+export class Dolly extends Tool {
+  #camera;
+  #isDragging = false;
+  #lastY = 0;
+
   constructor(camera) {
+    super();
     this.name = "Dolly";
-    this.camera = camera;
-    this.isDragging = false;
-    this.lastY = 0;
+    this.#camera = camera;
   }
 
   activate() {
     super.activate();
-    this.isDragging = false;
+    this.#isDragging = false;
   }
 
   onMouseDown(event) {
     super.onMouseDown(event);
-    this.isDragging = true;
-    this.lastY = event.clientY;
+    this.#isDragging = true;
+    this.#lastY = event.clientY;
 
     return false;
   }
 
   onMouseMove(event) {
-    if (!this.isDragging) return;
+    if (!this.#isDragging) return;
     
     super.onMouseMove(event);
 
-    const deltaY = event.clientY - this.lastY;
+    const deltaY = event.clientY - this.#lastY;
     
     // Scale movement by a sensitivity factor
     const sensitivity = 0.002;
     
-    this.camera.dolly(-deltaY * sensitivity);
+    if (this.#camera) {
+      this.#camera.dolly(-deltaY * sensitivity);
+    }
 
-    this.lastY = event.clientY;
+    this.#lastY = event.clientY;
 
     return true;
   }
 
   onMouseUp(event) {
     super.onMouseUp(event);
-    this.isDragging = false;
+    this.#isDragging = false;
     return false;
   }
 }
