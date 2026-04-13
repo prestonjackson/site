@@ -1,45 +1,56 @@
+// @ts-check
+"use strict";
+
 import { Tool } from "./tool.js";
 
 export class Rectangle extends Tool {
+  /** @type {boolean} */
   #isDrawing = false;
+  /** @type {number} */
   #startX = 0;
+  /** @type {number} */
   #startY = 0;
+  /** @type {number} */
   #lastX = 0;
+  /** @type {number} */
   #lastY = 0;
 
   constructor() {
-    super();
-    this.name = "Rectangle";
+    super("Rectangle");
   }
 
-  activate() {
-    super.activate();
-    this.#isDrawing = false;
-  }
-
-  onMouseDown(event) {
-    super.onMouseDown(event);
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseDown(x, y) {
+    super.onMouseDown(x, y);
     this.#isDrawing = true;
-    this.#startX = event.clientX;
-    this.#startY = event.clientY;
-    this.#lastX = event.clientX;
-    this.#lastY = event.clientY;
+    this.#startX = x;
+    this.#startY = y;
+    this.#lastX = x;
+    this.#lastY = y;
+    return true;
   }
 
-  onMouseMove(event) {
-    if (!this.#isDrawing) return;
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseMove(x, y) {
+    super.onMouseMove(x, y);
+    if (!this.isDragging) {
+      return false;
+    }
     
-    const width = event.clientX - this.#startX;
-    const height = event.clientY - this.#startY;
+    const width = x - this.#startX;
+    const height = y - this.#startY;
     
     console.log(`drawing: size (${width}, ${height})`);
     
-    this.#lastX = event.clientX;
-    this.#lastY = event.clientY;
+    this.#lastX = x;
+    this.#lastY = y;
+    return true;
   }
 
-  onMouseUp(event) {
-    super.onMouseUp(event);
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseUp(x, y) {
+    super.onMouseUp(x, y);
     this.#isDrawing = false;
+    return true;
   }
 }

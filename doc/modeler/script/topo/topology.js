@@ -109,9 +109,7 @@ export class Topology {
     if (!Array.isArray(edgeIds) || edgeIds.length < 3) {
       throw new Error("Face requires an array of at least 3 edge IDs");
     }
-
-    const edges = edgeIds.map(id => this.readEdge(id));
-    const face = new Face(edges);
+    const face = new Face(edgeIds);
     this.#faces.set(face.id, face);
     return face.id;
   }
@@ -134,8 +132,7 @@ export class Topology {
    */
   updateFace(id, edgeIds) {
     const face = this.readFace(id);
-    const edges = edgeIds.map(eId => this.readEdge(eId));
-    face.edges = edges;
+    face.edgeIds = edgeIds;
     return face.id;
   }
 

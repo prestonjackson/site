@@ -1,35 +1,38 @@
+// @ts-check
+"use strict";
+
 import { Tool } from "./tool.js";
 
+import { Camera } from "../model/camera.js";
+
 export class Dolly extends Tool {
+  /** @type {Camera} */
   #camera;
-  #isDragging = false;
+  /** @type {number} */
   #lastY = 0;
 
+  /** @param {Camera} camera */
   constructor(camera) {
-    super();
-    this.name = "Dolly";
+    super("Dolly");
     this.#camera = camera;
   }
 
-  activate() {
-    super.activate();
-    this.#isDragging = false;
-  }
-
-  onMouseDown(event) {
-    super.onMouseDown(event);
-    this.#isDragging = true;
-    this.#lastY = event.clientY;
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseDown(x, y) {
+    super.onMouseDown(x, y);
+    this.#lastY = y;
 
     return false;
   }
 
-  onMouseMove(event) {
-    if (!this.#isDragging) return;
-    
-    super.onMouseMove(event);
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseMove(x, y) {
+    super.onMouseMove(x, y);
+    if (this.isDragging) {
+      return false;
+    }
 
-    const deltaY = event.clientY - this.#lastY;
+    const deltaY = y - this.#lastY;
     
     // Scale movement by a sensitivity factor
     const sensitivity = 0.002;
@@ -38,14 +41,14 @@ export class Dolly extends Tool {
       this.#camera.dolly(-deltaY * sensitivity);
     }
 
-    this.#lastY = event.clientY;
+    this.#lastY = y;
 
     return true;
   }
 
-  onMouseUp(event) {
-    super.onMouseUp(event);
-    this.#isDragging = false;
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseUp(x, y) {
+    super.onMouseUp(x, y);
     return false;
   }
 }

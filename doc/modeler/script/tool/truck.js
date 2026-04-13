@@ -1,58 +1,58 @@
+// @ts-check
+"use strict";
+
 import { Tool } from "./tool.js";
 
+import { Camera } from "../model/camera.js";
+
 export class Truck extends Tool {
+  /** @type {Camera} */
   #camera;
-  #isDragging = false;
+  /** @type {number} */
   #lastX = 0;
+  /** @type {number} */
   #lastY = 0;
 
+  /** @param {Camera} camera */
   constructor(camera) {
-    super();
-    this.name = "Truck";
+    super("Truck");
     this.#camera = camera;
   }
 
-  activate() {
-    super.activate();
-    this.#isDragging = false;
-  }
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseDown(x, y) {
+    super.onMouseDown(x, y);
+    this.#lastX = x;
+    this.#lastY = y;
 
-  onMouseDown(event) {
-    super.onMouseDown(event);
-    this.#isDragging = true;
-    this.#lastX = event.clientX;
-    this.#lastY = event.clientY;
-
-    // No need to request render on mouse down
     return false;
   }
 
-  onMouseMove(event) {
-    if (!this.#isDragging) return;
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseMove(x, y) {
+    super.onMouseMove(x, y);
+    if (!this.isDragging) {
+      return false;
+    }
     
-    super.onMouseMove(event);
-    const deltaX = event.clientX - this.#lastX;
-    const deltaY = event.clientY - this.#lastY;
+    const deltaX = x - this.#lastX;
+    const deltaY = y - this.#lastY;
     
     // Scale movement by a sensitivity factor
     const sensitivity = 0.002;
     
-    if (this.#camera) {
-      this.#camera.truck(deltaX * sensitivity, -deltaY * sensitivity);
-    }
+    this.#camera.truck(deltaX * sensitivity, -deltaY * sensitivity);
     
-    this.#lastX = event.clientX;
-    this.#lastY = event.clientY;
+    this.#lastX = x;
+    this.#lastY = y;
 
     // Indicate that the model was modified, it's dirty.
     return true; 
   }
 
-  onMouseUp(event) {
-    super.onMouseUp(event);
-    this.#isDragging = false;
-
-    // No need to request render on mouse up
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseUp(x, y) {
+    super.onMouseUp(x, y);
     return false; 
   }
 }

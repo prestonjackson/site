@@ -1,41 +1,49 @@
+// @ts-check
+"use strict";
+
 import { Tool } from "./tool.js";
 
+/** Selection tool, to pick items in the model for manipulation. */
 export class Select extends Tool {
-  #isDragging = false;
   #lastX = 0;
   #lastY = 0;
 
   constructor() {
-    super();
-    this.name = "Select";
+    super("Select");
   }
 
   activate() {
     super.activate();
-    this.#isDragging = false;
   }
 
-  onMouseDown(event) {
-    super.onMouseDown(event);
-    this.#isDragging = true;
-    this.#lastX = event.clientX;
-    this.#lastY = event.clientY;
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseDown(x, y) {
+    super.onMouseDown(x, y);
+    this.#lastX = x;
+    this.#lastY = y;
+    return true;
   }
 
-  onMouseMove(event) {
-    if (!this.#isDragging) return;
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseMove(x, y) {
+    super.onMouseMove(x, y);
+    if (!this.isDragging) {
+      return false;
+    }
     
-    const deltaX = event.clientX - this.#lastX;
-    const deltaY = event.clientY - this.#lastY;
+    const deltaX = x - this.#lastX;
+    const deltaY = y - this.#lastY;
     
     console.log(`dragging: delta (${deltaX}, ${deltaY})`);
     
-    this.#lastX = event.clientX;
-    this.#lastY = event.clientY;
+    this.#lastX = x;
+    this.#lastY = y;
+    return true;
   }
 
-  onMouseUp(event) {
-    super.onMouseUp(event);
-    this.#isDragging = false;
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseUp(x, y) {
+    super.onMouseUp(x, y);
+    return true;
   }
 }

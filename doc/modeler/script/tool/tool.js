@@ -8,10 +8,24 @@
  */
 export class Tool {
   /** @type {string} */
-  name;
+  #name;
+  /** @type {boolean} */
+  #isActive = false;
+  /** @type {boolean} */
+  #isDragging = false;
 
-  constructor() {
-    this.name = "Tool";
+
+  /** @param {string} name */
+  constructor(name) {
+    this.#name = name;
+  }
+
+  get isActive() {
+    return this.#isActive;
+  }
+
+  get isDragging() {
+    return this.#isDragging;
   }
 
   /**
@@ -19,6 +33,7 @@ export class Tool {
    */
   activate() {
     console.log("activated");
+    this.#isActive = true;
   }
 
   /**
@@ -26,35 +41,43 @@ export class Tool {
    */
   deactivate() {
     console.log("deactivated");
+    this.#isActive = false;
   }
 
   /**
    * Called when the mouse button is pressed on the canvas while this tool is active.
-   * @param {MouseEvent} event - The mouse event
-   * @returns {boolean} - Return true if the event caused a change that requires re-rendering
+   * @param {number} x - The x-coordinate of the mouse event
+   * @param {number} y - The y-coordinate of the mouse event
+   * @return {boolean} - Return true re-rendering is required
    */
-  onMouseDown(event) {
-    console.log(`mouseDown at (${event.clientX}, ${event.clientY})`);
+  onMouseDown(x, y) {
+    console.log(`mouseDown at (${x}, ${y})`);
+    this.#isDragging = true;
     return false;
   }
 
   /**
    * Called when the mouse moves on the canvas while this tool is active.
-   * @param {MouseEvent} event - The mouse event
-   * @return {boolean} - Return true if the event caused a change that requires re-rendering
+   * @param {number} x - The x-coordinate of the mouse event
+   * @param {number} y - The y-coordinate of the mouse event
+   * @return {boolean} - Return true re-rendering is required
    */
-  onMouseMove(event) {
-    console.log(`mouseMove at (${event.clientX}, ${event.clientY})`);
+  onMouseMove(x, y) {
+    if (!this.#isDragging) {
+      console.log(`mouseMove at (${x}, ${y})`);
+    }
     return false;
   }
 
   /**
    * Called when the mouse button is released while this tool is active.
-   * @param {MouseEvent} event - The mouse event
-   * @returns {boolean} - Return true if the event caused a change that requires re-rendering
+   * @param {number} x - The x-coordinate of the mouse event
+   * @param {number} y - The y-coordinate of the mouse event
+   * @return {boolean} - Return true re-rendering is required
    */
-  onMouseUp(event) {
-    console.log(`mouseUp at (${event.clientX}, ${event.clientY})`);
+  onMouseUp(x, y) {
+    console.log(`mouseUp at (${x}, ${y})`);
+    this.#isDragging = false;
     return false;
   }
 }

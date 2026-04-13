@@ -36,6 +36,10 @@ export class Mat4 {
 
   /**
    * Create a scaling matrix
+   * @param {number} x - Scale factor in X direction
+   * @param {number} y - Scale factor in Y direction
+   * @param {number} z - Scale factor in Z direction
+   * @returns {Mat4}
    */
   static scale(x, y, z) {
     const mat = new Mat4();
@@ -52,6 +56,8 @@ export class Mat4 {
   /**
    * Multiply this matrix by another matrix
    * Result = this * other
+   * @param {Mat4} other - The matrix to multiply by
+   * @returns {Mat4}
    */
   multiply(other) {
     const a = this.data;
@@ -86,6 +92,10 @@ export class Mat4 {
 
   /**
    * Create a translation matrix
+   * @param {number} x - Translation in X direction
+   * @param {number} y - Translation in Y direction
+   * @param {number} z - Translation in Z direction
+   * @returns {Mat4}
    */
   static translate(x, y, z) {
     const mat = new Mat4();
@@ -97,6 +107,8 @@ export class Mat4 {
 
   /**
    * Create a rotation matrix around X axis (radians)
+   * @param {number} angle - Rotation angle in radians
+   * @returns {Mat4}
    */
   static rotateX(angle) {
     const cos = Math.cos(angle);
@@ -111,6 +123,8 @@ export class Mat4 {
 
   /**
    * Create a rotation matrix around Y axis (radians)
+   * @param {number} angle - Rotation angle in radians
+   * @returns {Mat4}
    */
   static rotateY(angle) {
     const cos = Math.cos(angle);
@@ -125,6 +139,8 @@ export class Mat4 {
 
   /**
    * Create a rotation matrix around Z axis (radians)
+   * @param {number} angle - Rotation angle in radians
+   * @returns {Mat4}
    */
   static rotateZ(angle) {
     const cos = Math.cos(angle);
@@ -139,6 +155,11 @@ export class Mat4 {
 
   /**
    * Create a perspective projection matrix
+   * @param {number} fov - Field of view in radians
+   * @param {number} aspect - Aspect ratio (width/height)
+   * @param {number} near - Near clipping plane
+   * @param {number} far - Far clipping plane
+   * @returns {Mat4}
    */
   static perspective(fov, aspect, near, far) {
     const f = 1.0 / Math.tan(fov / 2.0);
@@ -154,9 +175,10 @@ export class Mat4 {
 
   /**
    * Create a lookAt view matrix
-   * eye: Vec3 - camera position
-   * target: Vec3 - point to look at
-   * up: Vec3 - up direction
+   * @param {Vec3} eye - camera position
+   * @param {Vec3} target - point to look at
+   * @param {Vec3} up - up direction
+   * @returns {Mat4}
    */
   static lookAt(eye, target, up) {
     const f = target.subtract(eye).normalize();
@@ -190,6 +212,8 @@ export class Mat4 {
 
   /**
    * Transform a Vec3 point by this matrix (assumes w=1)
+   * @param {Vec3} v - The point to transform
+   * @returns {Vec3}
    */
   transformPoint(v) {
     const x = this.data[0] * v.x + this.data[4] * v.y + this.data[8] * v.z + this.data[12];
@@ -201,6 +225,9 @@ export class Mat4 {
   /**
    * Create a rotation matrix around an arbitrary axis
    * Uses Rodrigues' rotation formula
+   * @param {Vec3} axis - The axis to rotate around (should be normalized)
+   * @param {number} angle - Rotation angle in radians
+   * @returns {Mat4}
    */
   static rotateAxis(axis, angle) {
     const a = axis.normalize();
@@ -227,7 +254,7 @@ export class Mat4 {
 
   /**
    * Invert this matrix.
-   * Returns the inverse matrix, or identity if matrix is singular.
+   * @returns {Mat4} the inverse matrix, or identity if matrix is singular.
    */
   invert() {
     const inv = new Mat4();

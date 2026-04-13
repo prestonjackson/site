@@ -1,11 +1,14 @@
 // @ts-check
+"use strict";
+
 import { Tool } from "./tool.js";
 
-/** @import { Model } from "../model/model.js" */
+import { Point } from "../math/point.js";
+import { Topology } from "../topo/topology.js";
 
 export class Pencil extends Tool {
-  /** @type {Model?} */
-  #model;
+  /** @type {Topology} */
+  #topology;
   /** @type {boolean} */
   #isDrawing = false;
   /** @type {number} */
@@ -15,47 +18,47 @@ export class Pencil extends Tool {
   /** @type {number} */
   #pointSize = 0.1; // Size of the small triangles
 
-  /** @param {Model?} [model] */
-  constructor(model = null) {
-    super();
-    this.#model = model;
-    this.name = "Pencil";
+  /** @param {Topology} topology */
+  constructor(topology) {
+    super("Pencil");
+    this.#topology = topology;
   }
 
-  activate() {
-    super.activate();
-    this.#isDrawing = false;
-  }
-
-  onMouseDown(event) {
-    super.onMouseDown(event);
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseDown(x, y) {
+    super.onMouseDown(x, y);
     this.#isDrawing = true;
-    this.#lastX = event.clientX;
-    this.#lastY = event.clientY;
+    this.#lastX = x
+    this.#lastY = y;
+    return false;
   }
 
-  onMouseMove(event) {
-    if (!this.#isDrawing) return;
-    
-    if (!this.#model) {
-      return;
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseMove(x, y) {
+    super.onMouseMove(x, y);
+    if (!this.isDragging) {
+      return false;
     }
-
+    
     // Convert screen coordinates to world coordinates on ground plane (z=0)
     // Note: this relies on the model having a canvas which is slightly circular
     // I'll skip the logic for now as it's complex and likely broken in user code.
     
-    this.#lastX = event.clientX;
-    this.#lastY = event.clientY;
+    this.#lastX = x;
+    this.#lastY = y;
+    return true;
   }
 
-  onMouseUp(event) {
-    super.onMouseUp(event);
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseUp(x, y) {
+    super.onMouseUp(x, y);
     this.#isDrawing = false;
+    return false;
   }
 
   /**
    * Add a small triangle at a world position.
+   * @param {Point} center - The center position of the triangle in world coordinates.
    */
   addPointTriangle(center) {
     // Skip implementation for now to avoid breaking things, 

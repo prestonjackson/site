@@ -22,6 +22,7 @@ export class Color {
     this.a = a;
   }
 
+  /** @param {string} hex @returns {Color} */
   static fromHex(hex) {
     hex = hex.replace(/^#/, '');
     if (hex.length === 3) {

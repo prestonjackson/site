@@ -20,6 +20,7 @@ export class Vec3 {
     this.data = new Float32Array([x, y, z]);
   }
 
+  /** @param {Array<number>|Float32Array} arr @returns {Vec3} */
   static fromArray(arr) {
     if (!Array.isArray(arr) && !(arr instanceof Float32Array)) {
       throw new TypeError("Argument must be an array or Float32Array");

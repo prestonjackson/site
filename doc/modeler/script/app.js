@@ -8,7 +8,6 @@ import { Dolly } from "./tool/dolly.js";
 import { Truck } from "./tool/truck.js";
 import { Pencil } from "./tool/pencil.js";
 import { Rectangle } from "./tool/rectangle.js";
-import { Oval } from "./tool/oval.js";
 
 /** @import { Tool } from "./tool/tool.js" */
 
@@ -61,8 +60,7 @@ class Application {
   #pencilButton;
   /** @type {HTMLElement?} */
   #rectangleButton;
-  /** @type {HTMLElement?} */
-  #ovalButton;
+
 
   /** @param {string} baseURI */
   constructor(baseURI) {
@@ -111,7 +109,6 @@ class Application {
     this.#truckButton = document.getElementById("truck-button");
     this.#pencilButton = document.getElementById("pencil-button");
     this.#rectangleButton = document.getElementById("rectangle-button");
-    this.#ovalButton = document.getElementById("oval-button");
 
     this.#selectButton.onclick = () => this.activateTool('select');
     this.#orbitButton.onclick = () => this.activateTool('orbit');
@@ -119,7 +116,6 @@ class Application {
     this.#truckButton.onclick = () => this.activateTool('truck');
     this.#pencilButton.onclick = () => this.activateTool('pencil');
     this.#rectangleButton.onclick = () => this.activateTool('rectangle');
-    this.#ovalButton.onclick = () => this.activateTool('oval');
 
     // Set handlers for the control buttons.
     this.#offerButton = document.getElementById("offer-button");
@@ -195,6 +191,7 @@ class Application {
     this.#messageInputBox.disabled = true;
   }
 
+  /** @param {string} toolName */
   activateTool(toolName) {
     if (this.#activeTool) {
       this.#activeTool.deactivate();
@@ -235,11 +232,6 @@ class Application {
         this.#activeToolButton = this.#rectangleButton;
         toolIcon = '/modeler/image/rectangle.svg';
         break;
-      case 'oval':
-        this.#activeTool = new Oval();
-        this.#activeToolButton = this.#ovalButton;
-        toolIcon = '/modeler/image/oval.svg';
-        break;
     }
 
     if (this.#activeToolButton) {
@@ -256,23 +248,25 @@ class Application {
     }
   }
 
+  /** Canvas mouse event handlers - delegate to active tool if it exists
+   * @param {MouseEvent} event */
   onCanvasMouseDown(event) {
     if (this.#activeTool) {
-      const dirty = this.#activeTool.onMouseDown(event);
+      const dirty = this.#activeTool.onMouseDown(event.clientX, event.clientY);
       if (dirty) this.requestRender();
     }
   }
-
+  /** @param {MouseEvent} event */
   onCanvasMouseMove(event) {
     if (this.#activeTool) {
-      const dirty = this.#activeTool.onMouseMove(event);
+      const dirty = this.#activeTool.onMouseMove(event.clientX, event.clientY);
       if (dirty) this.requestRender();
     }
   }
-
+  /** @param {MouseEvent} event */
   onCanvasMouseUp(event) {
     if (this.#activeTool) {
-      const dirty = this.#activeTool.onMouseUp(event);
+      const dirty = this.#activeTool.onMouseUp(event.clientX, event.clientY);
       if (dirty) this.requestRender();
     }
   }

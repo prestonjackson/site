@@ -1,36 +1,43 @@
+// @ts-check
+"use strict";
+
 import { Tool } from "./tool.js";
 
+import { Camera } from "../model/camera.js"; 
+
 export class Orbit extends Tool {
+  /** @type {Camera} */
   #camera;
-  #isDragging = false;
+  /** @type {number} */
   #lastX = 0;
+  /** @type {number} */
   #lastY = 0;
 
+  /** @param {Camera} camera */
   constructor(camera) {
-    super();
+    super("Orbit");
     this.#camera = camera;
-    this.name = "Orbit";
   }
 
-  activate() {
-    super.activate();
-    this.#isDragging = false;
-  }
-
-  onMouseDown(event) {
-    super.onMouseDown(event);
-    this.#isDragging = true;
-    this.#lastX = event.clientX;
-    this.#lastY = event.clientY;
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseDown(x, y) {
+    super.onMouseDown(x, y);
+    this.#lastX = x;
+    this.#lastY = y;
 
     return false;
   }
 
-  onMouseMove(event) {
-    if (!this.#isDragging) return;
-    
-    const deltaX = event.clientX - this.#lastX;
-    const deltaY = event.clientY - this.#lastY;
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseMove(x, y) {
+    super.onMouseMove(x, y);
+
+    if (!this.isDragging) {
+      return false;
+    }
+
+    const deltaX = x - this.#lastX;
+    const deltaY = y - this.#lastY;
     
     // Scale movement by a sensitivity factor
     const sensitivity = 0.003;
@@ -39,15 +46,15 @@ export class Orbit extends Tool {
       this.#camera.orbit(-deltaY * sensitivity, deltaX * sensitivity);
     }
     
-    this.#lastX = event.clientX;
-    this.#lastY = event.clientY;
+    this.#lastX = x;
+    this.#lastY = y;
 
     return true;
   }
 
-  onMouseUp(event) {
-    super.onMouseUp(event);
-    this.#isDragging = false;
+  /** @param {number} x @param {number} y @returns {boolean} */
+  onMouseUp(x, y) {
+    super.onMouseUp(x, y);
 
     return false;
   }

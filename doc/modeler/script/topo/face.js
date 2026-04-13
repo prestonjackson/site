@@ -29,6 +29,13 @@ export class Face {
     return this.#edgeIds;
   }
 
+  /** Set the edges of this face.
+   * @param {Array<Id>} edgeIds
+   */
+  set edgeIds(edgeIds) {
+    this.#edgeIds = edgeIds;
+  }
+
   /**
    * @returns {Id}
    */
