@@ -1,6 +1,7 @@
-// Presents an easy to use interface to the Signaling Service.
-
+// @ts-check
 "use strict";
+
+// Presents an easy to use interface to the Signaling Service.
 
 export class Signaler {
   #url;

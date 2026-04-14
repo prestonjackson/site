@@ -1,4 +1,6 @@
 // @ts-check
+"use strict";
+
 import { Model } from "./model/model.js";
 import { Canvas } from "./gfx/canvas.js";
 import { Connection } from "./util/connection.js";
@@ -8,8 +10,7 @@ import { Dolly } from "./tool/dolly.js";
 import { Truck } from "./tool/truck.js";
 import { Pencil } from "./tool/pencil.js";
 import { Rectangle } from "./tool/rectangle.js";
-
-/** @import { Tool } from "./tool/tool.js" */
+import { Topology } from "./topo/topology.js";
 
 /**
  * Application - The main controller class for the Modeler application.
@@ -20,12 +21,14 @@ class Application {
   #baseURI;
   /** @type {string} */
   #id;
-  /** @type {Connection?} */
+  /** @type {Connection} */
   #connection;
-  /** @type {Canvas?} */
+  /** @type {Canvas} */
   #canvas;
-  /** @type {Model?} */
+  /** @type {Model} */
   #model;
+  /** @type {Topology} */
+  #toolTopology;
   /** @type {any} */
   #activeTool; // Typed as any because all tools extend Tool but have different signatures
   /** @type {HTMLElement?} */
@@ -33,32 +36,32 @@ class Application {
   /** @type {boolean} */
   #renderRequested = false;
 
-  /** @type {HTMLButtonElement?} */
+  /** @type {HTMLButtonElement} */
   #offerButton;
-  /** @type {HTMLButtonElement?} */
+  /** @type {HTMLButtonElement} */
   #answerButton;
-  /** @type {HTMLButtonElement?} */
+  /** @type {HTMLButtonElement} */
   #connectButton;
-  /** @type {HTMLButtonElement?} */
+  /** @type {HTMLButtonElement} */
   #disconnectButton;
-  /** @type {HTMLButtonElement?} */
+  /** @type {HTMLButtonElement} */
   #sendButton;
-  /** @type {HTMLInputElement?} */
+  /** @type {HTMLInputElement} */
   #messageInputBox;
-  /** @type {HTMLElement?} */
+  /** @type {HTMLElement} */
   #receiveBox;
 
-  /** @type {HTMLElement?} */
+  /** @type {HTMLElement} */
   #truckButton;
-  /** @type {HTMLElement?} */
+  /** @type {HTMLElement} */
   #dollyButton;
-  /** @type {HTMLElement?} */
+  /** @type {HTMLElement} */
   #orbitButton;
-  /** @type {HTMLElement?} */
+  /** @type {HTMLElement} */
   #selectButton;
-  /** @type {HTMLElement?} */
+  /** @type {HTMLElement} */
   #pencilButton;
-  /** @type {HTMLElement?} */
+  /** @type {HTMLElement} */
   #rectangleButton;
 
 
@@ -67,20 +70,14 @@ class Application {
     this.#baseURI = baseURI;
     this.#id = "abcd";
 
-    this.#connection = null;
-    this.#canvas = null;
-    this.#model = null;
-    this.#activeTool = null;
-    this.#activeToolButton = null;
-  }
-
-  run() {
     // Create a model to hold geometric data
     this.#model = new Model();
     this.#model.insertTestGeometry();
+    this.#toolTopology = new Topology();
 
     // Set up the canvas with WebGPU
-    const canvasElement = document.getElementById("canvas");
+    const canvasElement =
+        /** @type {HTMLCanvasElement} */ (document.getElementById("canvas"));
     const context = canvasElement.getContext("webgpu");
     if (!context) {
       console.error("WebGPU context not available");
@@ -99,16 +96,21 @@ class Application {
     window.addEventListener("resize", () => this.resizeCanvas());
     this.resizeCanvas();
 
-    // Set up the peer connection
-    this.#connection = new Connection(this.#baseURI);
-
     // Set handlers for the toolbar buttons.
-    this.#selectButton = document.getElementById("select-button");
-    this.#orbitButton = document.getElementById("orbit-button");
-    this.#dollyButton = document.getElementById("dolly-button");
-    this.#truckButton = document.getElementById("truck-button");
-    this.#pencilButton = document.getElementById("pencil-button");
-    this.#rectangleButton = document.getElementById("rectangle-button");
+    this.#activeTool = null;
+    this.#activeToolButton = null;
+    this.#selectButton =
+       /** @type {HTMLButtonElement} */ (document.getElementById("select-button"));
+    this.#orbitButton = 
+       /** @type {HTMLButtonElement} */ (document.getElementById("orbit-button"));
+    this.#dollyButton = 
+       /** @type {HTMLButtonElement} */ (document.getElementById("dolly-button"));
+    this.#truckButton = 
+       /** @type {HTMLButtonElement} */ (document.getElementById("truck-button"));
+    this.#pencilButton = 
+       /** @type {HTMLButtonElement} */ (document.getElementById("pencil-button"));
+    this.#rectangleButton = 
+       /** @type {HTMLButtonElement} */ (document.getElementById("rectangle-button"));
 
     this.#selectButton.onclick = () => this.activateTool('select');
     this.#orbitButton.onclick = () => this.activateTool('orbit');
@@ -118,13 +120,23 @@ class Application {
     this.#rectangleButton.onclick = () => this.activateTool('rectangle');
 
     // Set handlers for the control buttons.
-    this.#offerButton = document.getElementById("offer-button");
-    this.#answerButton = document.getElementById("answer-button");
-    this.#connectButton = document.getElementById("connect-button");
-    this.#disconnectButton = document.getElementById("disconnect-button");
-    this.#sendButton = document.getElementById("send-button");
-    this.#messageInputBox = document.getElementById("message-input-box");
-    this.#receiveBox = document.getElementById("receive-box");
+    this.#offerButton = 
+       /** @type {HTMLButtonElement} */ (document.getElementById("offer-button"));
+    this.#answerButton = 
+       /** @type {HTMLButtonElement} */ (document.getElementById("answer-button"));
+    this.#connectButton = 
+       /** @type {HTMLButtonElement} */ (document.getElementById("connect-button"));
+    this.#disconnectButton = 
+       /** @type {HTMLButtonElement} */ (document.getElementById("disconnect-button"));
+    this.#sendButton = 
+       /** @type {HTMLButtonElement} */ (document.getElementById("send-button"));
+    this.#messageInputBox = 
+       /** @type {HTMLInputElement} */ (document.getElementById("message-input-box"));
+    this.#receiveBox = 
+       /** @type {HTMLElement} */ (document.getElementById("receive-box"));
+
+    // Set up the peer connection
+    this.#connection = new Connection(this.#baseURI);
 
     this.#offerButton.onclick = () => this.#connection.offer(this.#id);
     this.#answerButton.onclick = () => this.#connection.answer(this.#id);
@@ -133,11 +145,13 @@ class Application {
     this.#disconnectButton.onclick = () => this.onDisconnect();
     this.#sendButton.onclick = () => this.onSendMessage();
 
-    this.#connection.onreceive = (message) => this.onReceiveMessage(message);
+    this.#connection.onreceive = 
+        (/** @type {string} */ message) => this.onReceiveMessage(message);
   }
 
   resizeCanvas() {
-    const canvasElement = document.getElementById("canvas");
+    const canvasElement = 
+       /** @type {HTMLCanvasElement} */ (document.getElementById("canvas"));
     const dpr = window.devicePixelRatio || 1;
     canvasElement.width = canvasElement.clientWidth * dpr;
     canvasElement.height = canvasElement.clientHeight * dpr;
@@ -148,18 +162,19 @@ class Application {
       this.#renderRequested = true;
       requestAnimationFrame((timestamp) => {
         // Implement matrix collection from camera
-        const viewMatrix = this.#model.camera.getViewMatrix();
-        const projectionMatrix = this.#model.camera.getProjectionMatrix();
+        const modelMatrix = this.#model.modelMatrix;
+        const viewMatrix = this.#model.camera.viewMatrix;
+        const projectionMatrix = this.#model.camera.projectionMatrix;
 
-        const vertices = this.#model.topology.vertices;
-        const edges = this.#model.topology.edges;
-        const faces = this.#model.topology.faces;
+        const points = this.#model.topology.points;
+        const lines = this.#model.topology.lines;
+        const surfaces = this.#model.topology.surfaces;
 
         this.#canvas.drawFrame(timestamp,
-          null, // modelMatrix
+          modelMatrix, // modelMatrix
           viewMatrix,
           projectionMatrix,
-          vertices, edges, faces
+          points, lines, surfaces
         );
         this.#renderRequested = false;
       });
@@ -173,6 +188,7 @@ class Application {
     this.#messageInputBox.focus();
   }
 
+  /** @param {string} message */
   onReceiveMessage(message) {
     var element = document.createElement("p");
     var textNode = document.createTextNode(message);
@@ -196,6 +212,7 @@ class Application {
     if (this.#activeTool) {
       this.#activeTool.deactivate();
     }
+    // Remove the "active" button look from the previously active tool button.
     if (this.#activeToolButton) {
       this.#activeToolButton.classList.remove('active');
     }
@@ -223,7 +240,7 @@ class Application {
         toolIcon = '/modeler/image/truck.svg';
         break;
       case 'pencil':
-        this.#activeTool = new Pencil(this.#model);
+        this.#activeTool = new Pencil(this.#toolTopology);
         this.#activeToolButton = this.#pencilButton;
         toolIcon = '/modeler/image/pencil.svg';
         break;
@@ -275,7 +292,6 @@ class Application {
 // Global initialization
 const baseURI = document.baseURI;
 const app = new Application(baseURI);
-window.app = app;
-app.run();
+window['app'] = app;
 
 

@@ -1,3 +1,4 @@
+// @ts-check
 "use strict";
 
 import { Topology } from "../topo/topology.js";

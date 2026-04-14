@@ -1,9 +1,11 @@
+// @ts-check
 "use strict";
 
 import { Topology } from "../topo/topology.js";
 import { Camera } from "./camera.js";
 import { Grid } from "./grid.js";
 import { Point } from "../math/point.js";
+import { Mat4 } from "../math/mat4.js";
 
 /**
  * Model class - contains persistent data including topology, camera, and
@@ -17,6 +19,7 @@ import { Point } from "../math/point.js";
 export class Model {
   #topology;
   #camera;
+  #modelMatrix;
   #grid;
 
   constructor() {
@@ -25,6 +28,9 @@ export class Model {
 
     // Camera for view/projection matrices
     this.#camera = new Camera();
+
+    // Model matrix for transforming world coordinates
+    this.#modelMatrix = Mat4.identity();
 
     // Grid data (for rendering a reference grid)
     this.#grid = new Grid();
@@ -47,6 +53,10 @@ export class Model {
 
   get camera() {
     return this.#camera;
+  }
+
+  get modelMatrix() {
+    return this.#modelMatrix;
   }
 
   get grid() {

@@ -14,13 +14,10 @@ export class Vertex {
   /** @type {Point} */
   #point;
 
-  /** @param {Point|Vec3} point */
+  /** @param {Point} point */
   constructor(point) {
-    if (!(point instanceof Point) && !(point instanceof Vec3)) {
-      throw new TypeError("Vertex must be initialized with a Point or Vec3");
-    }
     this.#id = new Id();
-    this.#point = point instanceof Vec3 ? new Point(point) : point;
+    this.#point = point.clone();
   }
 
   /**
@@ -36,7 +33,7 @@ export class Vertex {
    * @param {Point} point
    */
   set point(point) {
-    this.#point = point instanceof Vec3 ? new Point(point) : point;
+    this.#point.copy(point);
   }
 
   /**

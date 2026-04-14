@@ -1,3 +1,6 @@
+// @ts-check
+"use strict";
+
 import { Signaler } from "./signaler.js";
 
 export class Connection {

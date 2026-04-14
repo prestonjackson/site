@@ -3,14 +3,15 @@
 
 import { Vec3 } from "../math/vec3.js";
 import { Mat4 } from "../math/mat4.js";
+import { Point } from "../math/point.js";
 
 /**
  * Camera - Manages view and projection matrices with truck, dolly, and orbit operations
  */
 export class Camera {
-  /** @type {Vec3} */
+  /** @type {Point} */
   position;
-  /** @type {Vec3} */
+  /** @type {Point} */
   target;
   /** @type {Vec3} */
   up;
@@ -24,13 +25,13 @@ export class Camera {
   far;
 
   /**
-   * @param {Vec3|null} [position]
-   * @param {Vec3|null} [target]
+   * @param {Point|null} [position]
+   * @param {Point|null} [target]
    * @param {Vec3|null} [up]
    */
   constructor(position = null, target = null, up = null) {
-    this.position = position || new Vec3(0, 0, 2);
-    this.target = target || new Vec3(0, 0, 0);
+    this.position = position || new Point(0, 0, 2);
+    this.target = target || new Point(0, 0, 0);
     this.up = up || new Vec3(0, 1, 0);
 
     this.fov = Math.PI / 4; // 45 degrees
@@ -41,6 +42,7 @@ export class Camera {
 
   /**
    * Truck - move camera left/right and up/down in screen space
+   * @param {number} dx @param {number} dy
    */
   truck(dx, dy) {
     // Get the forward vector (from eye to target)
@@ -61,6 +63,7 @@ export class Camera {
 
   /**
    * Dolly - move camera forward/backward along the view direction
+   * @param {number} distance - Positive to move forward, negative to move backward
    */
   dolly(distance) {
     const direction = this.target.subtract(this.position).normalize();
@@ -72,6 +75,8 @@ export class Camera {
 
   /**
    * Orbit - rotate camera around the target point
+   * @param {number} angleX - Rotation around the local right axis (vertical)
+   * @param {number} angleY - Rotation around the world up axis (horizontal)
    */
   orbit(angleX, angleY) {
     // Vector from target to camera
@@ -95,6 +100,9 @@ export class Camera {
 
   /**
    * Set the camera to look at a target from a position
+   * @param {Point} eye - Camera position
+   * @param {Point} target - Point to look at
+   * @param {Vec3} up - Up direction
    */
   lookAt(eye, target, up) {
     this.position = eye;
@@ -103,21 +111,72 @@ export class Camera {
   }
 
   /**
+   * Create a perspective projection matrix
+   * @param {number} fov - Field of view in radians
+   * @param {number} aspect - Aspect ratio (width/height)
+   * @param {number} near - Near clipping plane
+   * @param {number} far - Far clipping plane
+   * @returns {Mat4}
+   */
+  static perspective(fov, aspect, near, far) {
+    const f = 1.0 / Math.tan(fov / 2.0);
+    const mat = new Mat4();
+    mat.data[0] = f / aspect;
+    mat.data[5] = f;
+    mat.data[10] = (near + far) / (near - far);
+    mat.data[11] = -1.0;
+    mat.data[14] = (2.0 * near * far) / (near - far);
+    mat.data[15] = 0.0;
+    return mat;
+  }
+
+  /**
+   * Create a lookAt view matrix
+   * @param {Point} eye - camera position
+   * @param {Point} target - point to look at
+   * @param {Vec3} up - up direction
+   * @returns {Mat4}
+   */
+  static lookAt(eye, target, up) {
+    const f = target.subtract(eye).normalize();
+    const s = f.cross(up).normalize();
+    const u = s.cross(f);
+
+    const mat = new Mat4();
+    mat.data[0] = s.x;
+    mat.data[1] = s.y;
+    mat.data[2] = s.z;
+    mat.data[4] = u.x;
+    mat.data[5] = u.y;
+    mat.data[6] = u.z;
+    mat.data[8] = -f.x;
+    mat.data[9] = -f.y;
+    mat.data[10] = -f.z;
+    mat.data[12] = -s.dot(eye.toVec3());
+    mat.data[13] = -u.dot(eye.toVec3());
+    mat.data[14] = f.dot(eye.toVec3());
+    mat.data[15] = 1.0;
+
+    return mat;
+  }
+
+  /**
    * Get the view matrix
    */
-  getViewMatrix() {
-    return Mat4.lookAt(this.position, this.target, this.up);
+  get viewMatrix() {
+    return Camera.lookAt(this.position, this.target, this.up);
   }
 
   /**
    * Get the projection matrix
    */
-  getProjectionMatrix() {
-    return Mat4.perspective(this.fov, this.aspect, this.near, this.far);
+  get projectionMatrix() {
+    return Camera.perspective(this.fov, this.aspect, this.near, this.far);
   }
 
   /**
    * Set the aspect ratio (typically canvas width / height)
+   * @param {number} aspect The aspect ratio
    */
   setAspect(aspect) {
     this.aspect = aspect;
@@ -133,7 +192,8 @@ export class Camera {
    * @param {number} planeZ - Z coordinate of the intersection plane (default 0)
    * @returns {Vec3|null} World position on the plane, or null if ray is parallel
    */
-  screenToWorldOnPlane(screenX, screenY, viewportWidth, viewportHeight, planeZ = 0) {
+  screenToWorldOnPlane(screenX, screenY, viewportWidth, viewportHeight,
+                       planeZ = 0) {
     // Convert screen coordinates to normalized device coordinates (-1 to 1)
     const ndcX = (screenX / viewportWidth) * 2 - 1;
     const ndcY = 1 - (screenY / viewportHeight) * 2;
@@ -143,8 +203,8 @@ export class Camera {
     const ndcFar = new Vec3(ndcX, ndcY, 1);
 
     // Get camera matrices
-    const viewMatrix = this.getViewMatrix();
-    const projMatrix = this.getProjectionMatrix();
+    const viewMatrix = this.viewMatrix;
+    const projMatrix = this.projectionMatrix;
 
     // Compute inverse of projection * view
     const projViewMatrix = projMatrix.multiply(viewMatrix);

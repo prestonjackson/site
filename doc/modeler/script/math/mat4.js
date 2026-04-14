@@ -154,56 +154,6 @@ export class Mat4 {
   }
 
   /**
-   * Create a perspective projection matrix
-   * @param {number} fov - Field of view in radians
-   * @param {number} aspect - Aspect ratio (width/height)
-   * @param {number} near - Near clipping plane
-   * @param {number} far - Far clipping plane
-   * @returns {Mat4}
-   */
-  static perspective(fov, aspect, near, far) {
-    const f = 1.0 / Math.tan(fov / 2.0);
-    const mat = new Mat4();
-    mat.data[0] = f / aspect;
-    mat.data[5] = f;
-    mat.data[10] = (near + far) / (near - far);
-    mat.data[11] = -1.0;
-    mat.data[14] = (2.0 * near * far) / (near - far);
-    mat.data[15] = 0.0;
-    return mat;
-  }
-
-  /**
-   * Create a lookAt view matrix
-   * @param {Vec3} eye - camera position
-   * @param {Vec3} target - point to look at
-   * @param {Vec3} up - up direction
-   * @returns {Mat4}
-   */
-  static lookAt(eye, target, up) {
-    const f = target.subtract(eye).normalize();
-    const s = f.cross(up).normalize();
-    const u = s.cross(f);
-
-    const mat = new Mat4();
-    mat.data[0] = s.x;
-    mat.data[1] = s.y;
-    mat.data[2] = s.z;
-    mat.data[4] = u.x;
-    mat.data[5] = u.y;
-    mat.data[6] = u.z;
-    mat.data[8] = -f.x;
-    mat.data[9] = -f.y;
-    mat.data[10] = -f.z;
-    mat.data[12] = -s.dot(eye);
-    mat.data[13] = -u.dot(eye);
-    mat.data[14] = f.dot(eye);
-    mat.data[15] = 1.0;
-
-    return mat;
-  }
-
-  /**
    * Create an identity matrix
    */
   static identity() {

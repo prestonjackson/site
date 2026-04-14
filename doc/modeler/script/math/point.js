@@ -7,57 +7,89 @@ import { Vec3 } from "./vec3.js";
  * Point - lightweight wrapper around Vec3 for semantic 3D positions.
  */
 export class Point {
-  /** @type {Vec3} */
-  position;
+  /** @type {Number} */
+  #x;
+  /** @type {Number} */ 
+  #y;
+  /** @type {Number} */
+  #z;
 
   /**
-   * @param {Point|Vec3|number} x 
-   * @param {number} [y] 
-   * @param {number} [z] 
+   * @param {number} x 
+   * @param {number} y
+   * @param {number} z 
    */
   constructor(x = 0, y = 0, z = 0) {
-    if (x instanceof Point) {
-      this.position = x.position.clone();
-    } else if (x instanceof Vec3) {
-      this.position = x.clone();
-    } else {
-      this.position = new Vec3(x, y, z);
-    }
+    this.#x = x;
+    this.#y = y;
+    this.#z = z;
   }
 
-  get x() { return this.position.x; }
-  get y() { return this.position.y; }
-  get z() { return this.position.z; }
+  get x() { return this.#x; }
+  get y() { return this.#y; }
+  get z() { return this.#z; }
 
-  set x(value) { this.position.x = value; }
-  set y(value) { this.position.y = value; }
-  set z(value) { this.position.z = value; }
+  set x(value) { this.#x = value; }
+  set y(value) { this.#y = value; }
+  set z(value) { this.#z = value; }
 
   /** @returns {Point} */
   clone() {
-    return new Point(this.position);
+    return new Point(this.#x, this.#y, this.#z);
+  }
+
+  /** @param {Point} other @returns {Point} */
+  copy(other) {
+    this.#x = other.x;
+    this.#y = other.y;
+    this.#z = other.z;
+    return this;
   }
 
   /** @returns {Vec3} */
   toVec3() {
-    return this.position.clone();
+    return new Vec3(this.#x, this.#y, this.#z);
   }
 
-  /** @param {Point|Vec3} offset @returns {Point} */
-  translate(offset) {
-    const delta = offset instanceof Point ? offset.position : offset;
-    return new Point(this.position.add(delta));
+  /** @param {Point} augend @param {Vec3} addend @returns {Point} */
+  static add(augend, addend) {
+    return new Point(augend.x + addend.x,
+                     augend.y + addend.y,
+                     augend.z + addend.z);
+  }
+
+  /** @param {Vec3} addend @returns {Point} */
+  add(addend) {
+    this.#x += addend.x;
+    this.#y += addend.y;
+    this.#z += addend.z;
+    return this;
+  }
+
+  /**
+   * @param {Point} minuend @param {Point} subtrahend @returns {Vec3}
+   */
+  static subtract(minuend, subtrahend) {
+    return new Vec3(minuend.x - subtrahend.x,
+                    minuend.y - subtrahend.y,
+                    minuend.z - subtrahend.z);
+  }
+
+  /** @param {Point} subtrahend @returns {Vec3} */
+  subtract(subtrahend) {
+    return new Vec3(this.x - subtrahend.x,
+                    this.y - subtrahend.y,
+                    this.z - subtrahend.z);
   }
 
   /** @param {Point|Vec3} other @returns {boolean} */
   equals(other) {
-    const vec = other instanceof Point ? other.position : other;
-    return this.x === vec.x && this.y === vec.y && this.z === vec.z;
+    return this.x === other.x && this.y === other.y && this.z === other.z;
   }
 
-  /** @param {Vec3} vec3 @returns {Point} */
-  static fromVec3(vec3) {
-    return new Point(vec3);
+  /** @param {Vec3} vec @returns {Point} */
+  static fromVec3(vec) {
+    return new Point(vec.x, vec.y, vec.z);
   }
 
   /** @returns {Point} */
