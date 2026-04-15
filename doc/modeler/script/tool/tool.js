@@ -32,7 +32,6 @@ export class Tool {
    * Called when this tool is activated (becomes the active tool).
    */
   activate() {
-    console.log("activated");
     this.#isActive = true;
   }
 
@@ -40,7 +39,6 @@ export class Tool {
    * Called when this tool is deactivated (another tool takes over or app closes).
    */
   deactivate() {
-    console.log("deactivated");
     this.#isActive = false;
   }
 
@@ -51,7 +49,7 @@ export class Tool {
    * @return {boolean} - Return true re-rendering is required
    */
   onMouseDown(x, y) {
-    console.log(`mouseDown at (${x}, ${y})`);
+    console.log(`${this.#name} ouseDown at (${x}, ${y})`);
     this.#isDragging = true;
     return false;
   }
@@ -63,8 +61,8 @@ export class Tool {
    * @return {boolean} - Return true re-rendering is required
    */
   onMouseMove(x, y) {
-    if (!this.#isDragging) {
-      console.log(`mouseMove at (${x}, ${y})`);
+    if (this.#isDragging) {
+      console.log(`${this.#name} mouseDrag at (${x}, ${y})`);
     }
     return false;
   }
@@ -76,7 +74,7 @@ export class Tool {
    * @return {boolean} - Return true re-rendering is required
    */
   onMouseUp(x, y) {
-    console.log(`mouseUp at (${x}, ${y})`);
+    console.log(`${this.#name} mouseUp at (${x}, ${y})`);
     this.#isDragging = false;
     return false;
   }

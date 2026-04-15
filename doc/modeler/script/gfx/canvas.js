@@ -12,11 +12,11 @@ export class Canvas {
   #adapter;
   /** @type {GPUDevice?} */
   #device;
-  /** @type {GPURenderPipeline?} */
+  /** @type {GPURenderPipeline} */
   #renderPipeline;
   /** @type {GPUVertexBufferLayout?} */
   #vertexBufferLayout;
-  /** @type {GPUBuffer?} */
+  /** @type {GPUBuffer} */
   #uniformBuffer;
   /** @type {GPUBindGroup?} */
   #bindGroup;
@@ -27,15 +27,16 @@ export class Canvas {
   /** @type {number} */
   #vertexBufferSize = 0;
 
+  /** @param {GPUCanvasContext} context */
   constructor(context) {
     // The webgpu context from the canvas element.
     this.#context = context;
 
     this.#adapter = null;
     this.#device = null;
-    this.#renderPipeline = null;
+    this.#renderPipeline = new GPURenderPipeline();
     this.#vertexBufferLayout = null;
-    this.#uniformBuffer = null;
+    this.#uniformBuffer = new GPUBuffer();
     this.#bindGroup = null;
     this.#frameRequested = false;
 
@@ -182,7 +183,10 @@ export class Canvas {
     for (const [id, line] of lines) {
       lineIdMap.set(id, lineIndex);
       const [v1, v2] = line;
-      lineIndexData.push(pointIdMap.get(v1), pointIdMap.get(v2));
+      lineIndexData.push(
+        pointIdMap.get(v1),
+        pointIdMap.get(v2)
+      );
       lineIndex++;
     }
 
@@ -193,9 +197,9 @@ export class Canvas {
       polygonIdMap.set(id, polygonIndex);
       const [l1, l2, l3] = polygon;
       polygonIndexData.push(
-        pointIdMap.get(lines.get(l1)[0]),
-        pointIdMap.get(lines.get(l2)[0]),
-        pointIdMap.get(lines.get(l3)[0])
+        pointIdMap.get(lines.get(l1)?.[0] ?? 0),
+        pointIdMap.get(lines.get(l2)?.[0] ?? 0),
+        pointIdMap.get(lines.get(l3)?.[0] ?? 0)
       );
       polygonIndex++;
     }

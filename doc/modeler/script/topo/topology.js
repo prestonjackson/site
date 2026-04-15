@@ -191,17 +191,20 @@ export class Topology {
   /** @returns {{points: Map<Id, Point>, lines: Map<Id, Array<Id>>, polygons: Map<Id, Array<Id>>}} */
   getGeometry() {
     return {
-      points: Array.from(this.#vertices.entries()).reduce((map, [id, vertex]) => {
-        map.set(id, vertex.point);
-        return map;
+      points:
+        Array.from(this.#vertices.entries()).reduce((map, [id, vertex]) => {
+          map.set(id, vertex.point);
+          return map;
       }, new Map()),
-      lines: Array.from(this.#edges.entries()).reduce((map, [id, edge]) => {
-        map.set(id, edge.vertexIds);
-        return map;
+      lines:
+        Array.from(this.#edges.entries()).reduce((map, [id, edge]) => {
+          map.set(id, edge.vertexIds);
+          return map;
       }, new Map()),
-      polygons: Array.from(this.#faces.entries()).reduce((map, [id, face]) => {
-        map.set(id, face.edgeIds);
-        return map;
+      polygons:
+        Array.from(this.#faces.entries()).reduce((map, [id, face]) => {
+          map.set(id, face.edgeIds);
+          return map;
       }, new Map())
     };
   }

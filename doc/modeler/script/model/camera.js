@@ -161,16 +161,18 @@ export class Camera {
   }
 
   /**
-   * Get the view matrix
+   * Get the view transformation
+   * @returns {Mat4}
    */
-  get viewMatrix() {
+  get viewTransform() {
     return Camera.lookAt(this.position, this.target, this.up);
   }
 
   /**
-   * Get the projection matrix
+   * Get the projection transformation
+   * @returns {Mat4}
    */
-  get projectionMatrix() {
+  get projectionTransform() {
     return Camera.perspective(this.fov, this.aspect, this.near, this.far);
   }
 
@@ -203,8 +205,8 @@ export class Camera {
     const ndcFar = new Vec3(ndcX, ndcY, 1);
 
     // Get camera matrices
-    const viewMatrix = this.viewMatrix;
-    const projMatrix = this.projectionMatrix;
+    const viewMatrix = this.viewTransform;
+    const projMatrix = this.projectionTransform;
 
     // Compute inverse of projection * view
     const projViewMatrix = projMatrix.multiply(viewMatrix);

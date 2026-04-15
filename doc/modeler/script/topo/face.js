@@ -17,8 +17,11 @@ export class Face {
    * @param {Array<Id>} edgeIds
    */
   constructor(edgeIds) {
+    if (!Array.isArray(edgeIds) || edgeIds.length < 3) {
+      throw new Error("Face requires an array of at least 3 edge IDs");
+    }
     this.#id = new Id();
-    this.#edgeIds = edgeIds;
+    this.#edgeIds = [...edgeIds];  // Copy the array.
   }
 
   /**
@@ -26,14 +29,14 @@ export class Face {
    * @returns {Array<Id>}
    */
   get edgeIds() {
-    return this.#edgeIds;
+    return [...this.#edgeIds];  // Return a copy of the array.
   }
 
   /** Set the edges of this face.
    * @param {Array<Id>} edgeIds
    */
   set edgeIds(edgeIds) {
-    this.#edgeIds = edgeIds;
+    this.#edgeIds = [...edgeIds];  // Copy the array.
   }
 
   /**

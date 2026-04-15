@@ -9,29 +9,19 @@ import { Id } from "../util/id.js";
 export class Edge {
   /** @type {Id} */
   #id;
-  /** @type {Id} */
-  #v1;
-  /** @type {Id} */
-  #v2;
+  /** @type {Array<Id>} */
+  #vertexIds;
 
   /**
    * Create an edge between two vertices.
    * @param {Array<Id>} vertexIds
    */
   constructor(vertexIds) {
-    this.#id = new Id();
-
     if (!Array.isArray(vertexIds) || vertexIds.length !== 2) {
       throw new Error("Edge requires an array of exactly 2 vertex IDs");
     }
-
-    vertexIds.forEach(id => {
-      if (!(id instanceof Id) && typeof id !== 'string') {
-        throw new TypeError("Vertex ID must be an instance of Id or a string");
-      }
-    });
-
-    [this.#v1, this.#v2] = vertexIds;
+    this.#id = new Id();
+    this.#vertexIds = [...vertexIds];  // Copy the array.
   }
 
   /**
@@ -39,11 +29,11 @@ export class Edge {
    * @returns {Id}
    */
   get v1() {
-    return this.#v1;
+    return this.#vertexIds[0];
   }
 
   set v1(id) {
-    this.#v1 = id;
+    this.#vertexIds[0] = id;
   }
 
   /**
@@ -51,19 +41,19 @@ export class Edge {
    * @returns {Id}
    */
   get v2() {
-    return this.#v2;
+    return this.#vertexIds[1];
   }
 
   set v2(id) {
-    this.#v2 = id;
+    this.#vertexIds[1] = id;
   }
 
   /**
    * Get both vertices of this edge.
-   * @returns {[Id, Id]}
+   * @returns {Array<Id>}
    */
   get vertexIds() {
-    return [this.#v1, this.#v2];
+    return [...this.#vertexIds];
   }
 
   /**

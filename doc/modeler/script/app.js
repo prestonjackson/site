@@ -80,11 +80,11 @@ class Application {
         /** @type {HTMLCanvasElement} */ (document.getElementById("canvas"));
     const context = canvasElement.getContext("webgpu");
     if (!context) {
-      console.error("WebGPU context not available");
+      throw new Error("WebGPU context not available");
     }
     this.#canvas = new Canvas(context);
     this.#canvas.initialize().catch(err => {
-      console.error("Failed to initialize canvas:", err);
+      throw new Error("Failed to initialize canvas:", err);
     });
 
     // Register canvas mouse event listeners.
@@ -153,8 +153,15 @@ class Application {
     const canvasElement = 
        /** @type {HTMLCanvasElement} */ (document.getElementById("canvas"));
     const dpr = window.devicePixelRatio || 1;
-    canvasElement.width = canvasElement.clientWidth * dpr;
-    canvasElement.height = canvasElement.clientHeight * dpr;
+    const width = canvasElement.clientWidth * dpr;
+    const height = canvasElement.clientHeight * dpr;
+
+    canvasElement.height = height;
+    canvasElement.width = width;
+
+    this.#model.camera.aspect = width / height;
+
+    this.requestRender();
   }
 
   requestRender() {
@@ -162,28 +169,31 @@ class Application {
     // redundant renders. 
     if (!this.#renderRequested) {
       this.#renderRequested = true;
+
       requestAnimationFrame((timestamp) => {
         // Implement matrix collection from camera
-        const modelMatrix = this.#model.modelMatrix;
-        const viewMatrix = this.#model.camera.viewMatrix;
-        const projectionMatrix = this.#model.camera.projectionMatrix;
+        const modelTransform = this.#model.modelTransform;
+        const viewTransform = this.#model.camera.viewTransform;
+        const projectionTransform = this.#model.camera.projectionTransform;
 
         const geometry = this.#model.topology.getGeometry();
 
-        this.#canvas.renderFrame(timestamp,
-          modelMatrix, // modelMatrix
-          viewMatrix,
-          projectionMatrix,
+        this.#canvas.renderFrame(
+          timestamp,
+          modelTransform,
+          viewTransform,
+          projectionTransform,
           geometry.points,
           geometry.lines,
           geometry.polygons
         );
+
         this.#renderRequested = false;
       });
     }
   }
 
-  
+
   onSendMessage() {
     var message = this.#messageInputBox.value;
     this.#connection.send(message);

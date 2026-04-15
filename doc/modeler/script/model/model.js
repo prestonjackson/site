@@ -19,18 +19,19 @@ import { Mat4 } from "../math/mat4.js";
 export class Model {
   #topology;
   #camera;
-  #modelMatrix;
+  #modelTransform;
   #grid;
 
   constructor() {
     // Topological data (geometric structure)
     this.#topology = new Topology();
+    this.insertTestGeometry();
 
     // Camera for view/projection matrices
     this.#camera = new Camera();
 
     // Model matrix for transforming world coordinates
-    this.#modelMatrix = Mat4.identity();
+    this.#modelTransform = Mat4.identity();
 
     // Grid data (for rendering a reference grid)
     this.#grid = new Grid();
@@ -55,8 +56,8 @@ export class Model {
     return this.#camera;
   }
 
-  get modelMatrix() {
-    return this.#modelMatrix;
+  get modelTransform() {
+    return this.#modelTransform;
   }
 
   get grid() {
