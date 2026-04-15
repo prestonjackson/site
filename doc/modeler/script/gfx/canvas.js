@@ -1,12 +1,12 @@
 // @ts-check
+"use strict";
 
-/** @import { Mat4 } from "../math/mat4.js" */
-/** @import { Vertex } from "../topo/vertex.js" */
-/** @import { Edge } from "../topo/edge.js" */
-/** @import { Face } from "../topo/face.js" */
+import { Id } from "../util/id.js"
+import { Mat4 } from "../math/mat4.js"
+import { Point } from "../math/point.js"
 
 export class Canvas {
-  /** @type {GPUCanvasContext} */
+  /** @typedef {GPUCanvasContext} */
   #context;
   /** @type {GPUAdapter?} */
   #adapter;
@@ -145,26 +145,63 @@ export class Canvas {
   /**
    * Main render function that draws the frame.
    * @param {number} timestamp
-   * @param {Mat4} modelMatrix
-   * @param {Mat4} viewMatrix
-   * @param {Mat4} projectionMatrix
-   * @param {Map<import("../util/id.js").Id, Vertex>} vertices 
-   * @param {Map<import("../util/id.js").Id, Edge>} edges
-   * @param {Map<import("../util/id.js").Id, Face>} faces
+   * @param {Mat4} model
+   * @param {Mat4} view
+   * @param {Mat4} projection
+   * @param {Map<Id, Point>} points 
+   * @param {Map<Id, Array<Id>>} lines
+   * @param {Map<Id, Array<Id>>} polygons
    */
-  drawFrame(timestamp, modelMatrix, viewMatrix, projectionMatrix, vertices, edges, faces) {
+  renderFrame(timestamp,
+              model, view, projection,
+              points, lines, polygons) {
     if (!this.#device) return;
 
     // Update uniform buffer
     const uniformData = new Float32Array(32);
     for (let i = 0; i < 16; i++) {
-      uniformData[i] = viewMatrix.data[i];
-      uniformData[16 + i] = projectionMatrix.data[i];
+      uniformData[i] = view.data[i];
+      uniformData[16 + i] = projection.data[i];
     }
     this.#device.queue.writeBuffer(this.#uniformBuffer, 0, uniformData);
 
+    // Map all of the points into a single vertex buffer, and create index
+    // buffers for lines and polygons.  
+    const pointData = [];
+    const pointIdMap = new Map();
+    let pointIndex = 0;
+    for (const [id, point] of points) {
+      pointIdMap.set(id, pointIndex);
+      pointData.push(point.x, point.y, point.z);
+      pointIndex++;
+    }
+
+    const lineIndexData = [];
+    const lineIdMap = new Map();
+    let lineIndex = 0;
+    for (const [id, line] of lines) {
+      lineIdMap.set(id, lineIndex);
+      const [v1, v2] = line;
+      lineIndexData.push(pointIdMap.get(v1), pointIdMap.get(v2));
+      lineIndex++;
+    }
+
+    const polygonIndexData = [];
+    const polygonIdMap = new Map();
+    let polygonIndex = 0;
+    for (const [id, polygon] of polygons) {
+      polygonIdMap.set(id, polygonIndex);
+      const [l1, l2, l3] = polygon;
+      polygonIndexData.push(
+        pointIdMap.get(lines.get(l1)[0]),
+        pointIdMap.get(lines.get(l2)[0]),
+        pointIdMap.get(lines.get(l3)[0])
+      );
+      polygonIndex++;
+    }
+  
     // Flatten vertices into a buffer
-    const triangleVertices = [];
+    /*const triangleVertices = [];
     if (faces) {
       for (const face of faces.values()) {
         const vIds = new Set();
@@ -180,6 +217,12 @@ export class Canvas {
           }
         }
       }
+    }*/
+    const triangleVertices = [];
+    for (const index in polygonIndexData) {
+      triangleVertices.push(pointData[polygonIndexData[index] * 3]);
+      triangleVertices.push(pointData[polygonIndexData[index] * 3 + 1]);
+      triangleVertices.push(pointData[polygonIndexData[index] * 3 + 2]);
     }
 
     if (triangleVertices.length === 0) return;
@@ -189,7 +232,9 @@ export class Canvas {
 
     // Reallocate vertex buffer if needed (if it doesn't exist or is too small)
     if (!this.#vertexBuffer || this.#vertexBufferSize < byteLength) {
-      if (this.#vertexBuffer) this.#vertexBuffer.destroy();
+      if (this.#vertexBuffer) {
+        this.#vertexBuffer.destroy();
+      }
 
       this.#vertexBufferSize = Math.max(byteLength, 1024); // Minimum size or exact
       this.#vertexBuffer = this.#device.createBuffer({

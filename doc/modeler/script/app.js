@@ -158,6 +158,8 @@ class Application {
   }
 
   requestRender() {
+    // Only request a new frame if one isn't already requested, to avoid
+    // redundant renders. 
     if (!this.#renderRequested) {
       this.#renderRequested = true;
       requestAnimationFrame((timestamp) => {
@@ -166,21 +168,22 @@ class Application {
         const viewMatrix = this.#model.camera.viewMatrix;
         const projectionMatrix = this.#model.camera.projectionMatrix;
 
-        const points = this.#model.topology.points;
-        const lines = this.#model.topology.lines;
-        const surfaces = this.#model.topology.surfaces;
+        const geometry = this.#model.topology.getGeometry();
 
-        this.#canvas.drawFrame(timestamp,
+        this.#canvas.renderFrame(timestamp,
           modelMatrix, // modelMatrix
           viewMatrix,
           projectionMatrix,
-          points, lines, surfaces
+          geometry.points,
+          geometry.lines,
+          geometry.polygons
         );
         this.#renderRequested = false;
       });
     }
   }
 
+  
   onSendMessage() {
     var message = this.#messageInputBox.value;
     this.#connection.send(message);
@@ -291,7 +294,6 @@ class Application {
 
 // Global initialization
 const baseURI = document.baseURI;
-const app = new Application(baseURI);
-window['app'] = app;
+export const app = new Application(baseURI);
 
 

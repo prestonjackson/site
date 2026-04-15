@@ -12,12 +12,22 @@ import { Point } from "../math/point.js";
  * Manages topological elements independent of rendering or visualization.
  */
 export class Topology {
+  /** @type {Id} */
+  #id;
   /** @type {Map<Id, Vertex>} */
   #vertices = new Map();
   /** @type {Map<Id, Edge>} */
   #edges = new Map();
   /** @type {Map<Id, Face>} */
   #faces = new Map();
+
+  constructor() {
+    this.#id = new Id();
+  }
+
+  get id() {
+    return this.#id;
+  }
 
   /**
    * Add a vertex to the topology.
@@ -145,10 +155,6 @@ export class Topology {
     return id;
   }
 
-  get points() { return this.#vertices; }
-  get lines() { return this.#edges; }
-  get surfaces() { return this.#faces; }
-
   /**
    * Get the number of vertices.
    * @returns {number}
@@ -180,5 +186,23 @@ export class Topology {
     this.#vertices.clear();
     this.#edges.clear();
     this.#faces.clear();
+  }
+
+  /** @returns {{points: Map<Id, Point>, lines: Map<Id, Array<Id>>, polygons: Map<Id, Array<Id>>}} */
+  getGeometry() {
+    return {
+      points: Array.from(this.#vertices.entries()).reduce((map, [id, vertex]) => {
+        map.set(id, vertex.point);
+        return map;
+      }, new Map()),
+      lines: Array.from(this.#edges.entries()).reduce((map, [id, edge]) => {
+        map.set(id, edge.vertexIds);
+        return map;
+      }, new Map()),
+      polygons: Array.from(this.#faces.entries()).reduce((map, [id, face]) => {
+        map.set(id, face.edgeIds);
+        return map;
+      }, new Map())
+    };
   }
 }

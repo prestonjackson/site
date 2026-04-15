@@ -62,7 +62,7 @@ export class Edge {
    * Get both vertices of this edge.
    * @returns {[Id, Id]}
    */
-  getVertices() {
+  get vertexIds() {
     return [this.#v1, this.#v2];
   }
 
