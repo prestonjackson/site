@@ -30,7 +30,16 @@ export class Pencil extends Tool {
     this.#isDrawing = true;
     this.#lastX = x
     this.#lastY = y;
-    return false;
+
+    const v1 = this.#topology.createVertex(new Point(x + this.#pointSize, y + this.#pointSize, 0)); // Placeholder point, replace with actual world coordinates
+    const v2 = this.#topology.createVertex(new Point(x - this.#pointSize, y + this.#pointSize, 0));
+    const v3 = this.#topology.createVertex(new Point(x, y - this.#pointSize, 0));
+    const e1 = this.#topology.createEdge([v1, v2]);
+    const e2 = this.#topology.createEdge([v2, v3]);
+    const e3 = this.#topology.createEdge([v3, v1]);
+    const f = this.#topology.createFace([e1, e2, e3]);
+
+    return true;
   }
 
   /** @param {number} x @param {number} y @returns {boolean} */

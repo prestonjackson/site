@@ -11,6 +11,7 @@ import { Truck } from "./tool/truck.js";
 import { Pencil } from "./tool/pencil.js";
 import { Rectangle } from "./tool/rectangle.js";
 import { Topology } from "./topo/topology.js";
+import { Size2 } from "./math/size2.js";
 
 /**
  * Application - The main controller class for the Modeler application.
@@ -82,7 +83,9 @@ class Application {
     if (!context) {
       throw new Error("WebGPU context not available");
     }
-    this.#canvas = new Canvas(context);
+    this.#canvas = new Canvas(context,
+        new Size2(canvasElement.clientWidth, canvasElement.clientHeight),
+        window.devicePixelRatio);
     this.#canvas.initialize().catch(err => {
       throw new Error("Failed to initialize canvas:", err);
     });
@@ -152,14 +155,21 @@ class Application {
   resizeCanvas() {
     const canvasElement = 
        /** @type {HTMLCanvasElement} */ (document.getElementById("canvas"));
-    const dpr = window.devicePixelRatio || 1;
+    const dpr = window.devicePixelRatio;
     const width = canvasElement.clientWidth * dpr;
     const height = canvasElement.clientHeight * dpr;
 
-    canvasElement.height = height;
+    // Scale the canvas resolution by the device pixel ratio for crisp 
+    // rendering on high-DPI displays.
     canvasElement.width = width;
+    canvasElement.height = height;
 
-    this.#model.camera.aspect = width / height;
+    // 
+    this.#model.camera.aspect =
+        canvasElement.clientWidth / canvasElement.clientHeight;
+    this.#canvas.size =
+        new Size2(canvasElement.clientWidth, canvasElement.clientHeight);
+    //this.#canvas.dpr = window.devicePixelRatio;
 
     this.requestRender();
   }
@@ -253,7 +263,7 @@ class Application {
         toolIcon = '/modeler/image/truck.svg';
         break;
       case 'pencil':
-        this.#activeTool = new Pencil(this.#toolTopology);
+        this.#activeTool = new Pencil(this.#model.topology);
         this.#activeToolButton = this.#pencilButton;
         toolIcon = '/modeler/image/pencil.svg';
         break;
@@ -282,22 +292,35 @@ class Application {
    * @param {MouseEvent} event */
   onCanvasMouseDown(event) {
     if (this.#activeTool) {
-      const dirty = this.#activeTool.onMouseDown(event.clientX, event.clientY);
-      if (dirty) this.requestRender();
+      const canvasSize = this.#canvas.size; // in CSS Pixels (not device pixels)
+      console.log(`Canvas mouse down at (${event.clientX}, ${event.clientY}), canvas size: (${canvasSize.w}, ${canvasSize.h})`);
+      const modelPoint =
+          this.#model.camera.screenToWorldOnPlane(event.clientX, event.clientY, 
+                                                  canvasSize.w, canvasSize.h);
+
+      console.log(`Mapped to model point: (${modelPoint?.x}, ${modelPoint?.y}, ${modelPoint?.z})`);
+      const dirty = this.#activeTool.onMouseDown(modelPoint?.x, modelPoint?.y);
+      if (dirty) {
+        this.requestRender();
+      }
     }
   }
   /** @param {MouseEvent} event */
   onCanvasMouseMove(event) {
     if (this.#activeTool) {
       const dirty = this.#activeTool.onMouseMove(event.clientX, event.clientY);
-      if (dirty) this.requestRender();
+      if (dirty) {
+        this.requestRender();
+      }
     }
   }
   /** @param {MouseEvent} event */
   onCanvasMouseUp(event) {
     if (this.#activeTool) {
       const dirty = this.#activeTool.onMouseUp(event.clientX, event.clientY);
-      if (dirty) this.requestRender();
+      if (dirty) {
+        this.requestRender();
+      }
     }
   }
 }

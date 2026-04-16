@@ -4,6 +4,7 @@
 import { Id } from "../util/id.js"
 import { Mat4 } from "../math/mat4.js"
 import { Point } from "../math/point.js"
+import { Size2 } from "../math/size2.js";
 
 export class Canvas {
   /** @typedef {GPUCanvasContext} */
@@ -12,11 +13,11 @@ export class Canvas {
   #adapter;
   /** @type {GPUDevice?} */
   #device;
-  /** @type {GPURenderPipeline} */
+  /** @type {GPURenderPipeline?} */
   #renderPipeline;
   /** @type {GPUVertexBufferLayout?} */
   #vertexBufferLayout;
-  /** @type {GPUBuffer} */
+  /** @type {GPUBuffer?} */
   #uniformBuffer;
   /** @type {GPUBindGroup?} */
   #bindGroup;
@@ -26,17 +27,26 @@ export class Canvas {
   #vertexBuffer;
   /** @type {number} */
   #vertexBufferSize = 0;
+  /** @type {Size2} */
+  #size;
+  /** @type {number} */
+  #dpr;
 
-  /** @param {GPUCanvasContext} context */
-  constructor(context) {
+
+  /** 
+   * @param {GPUCanvasContext} context
+   * @param {Size2} size in pixels
+   * @param {number} dpr device pixel ratio */
+  constructor(context, size, dpr) {
     // The webgpu context from the canvas element.
     this.#context = context;
+    this.#size = size;
 
     this.#adapter = null;
     this.#device = null;
-    this.#renderPipeline = new GPURenderPipeline();
+    this.#renderPipeline = null;
     this.#vertexBufferLayout = null;
-    this.#uniformBuffer = new GPUBuffer();
+    this.#uniformBuffer = null;
     this.#bindGroup = null;
     this.#frameRequested = false;
 
@@ -141,6 +151,24 @@ export class Canvas {
         topology: "triangle-list",
       },
     });
+  }
+
+  get size() {
+    return this.#size;
+  }
+
+  /** @param {Size2} size */
+  set size(size) {
+    this.#size = size;
+  }
+
+  get dpr() {
+    return this.#dpr;
+  }
+
+  /** @param {number} dpr */
+  set dpr(dpr) {
+    this.#dpr = dpr;
   }
 
   /**
@@ -264,7 +292,7 @@ export class Canvas {
       ],
     });
 
-    renderPass.setPipeline(this.#renderPipeline);
+    renderPass.setPipeline(this.#renderPipeline ?? null);
     renderPass.setVertexBuffer(0, this.#vertexBuffer);
 
     if (this.#bindGroup) {
