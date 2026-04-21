@@ -1,15 +1,26 @@
 import re
 import sys
+import pathlib
+import gzip 
 
-def logGenerator(log_path):
-    with open(log_path) as f:
-        for line in f:
-            yield line
+def logGenerator(log_dir, log_prefix):
+    for path in pathlib.Path(log_dir).glob(f"*{log_prefix}.access*"):
+        print(f"{path}")
+
+        if path.suffix == ".gz":
+            with gzip.open(path, 'rt') as f:
+                for line in f:
+                    yield line
+        elif path.suffix == ".log":
+            with open(path) as f:
+                for line in f:
+                    yield line
+      
 
 
-def processLogs(log_path):
+def processLogs(log_dir, log_prefix):
 
-    log_lines = logGenerator(log_path)
+    log_lines = logGenerator(log_dir, log_prefix)
 
     LOG_PATTERN = re.compile(r'^(?P<ip>\S+) (?P<identity>\S+) (?P<user>\S+) \[(?P<time>.*?)\] "(?P<request>.*?)" (?P<status>\d+) (?P<bytes>\S+) "(?P<referer>.*?)" "(?P<user_agent>.*?)"$')
 
@@ -43,9 +54,7 @@ if (__name__ == "__main__"):
         print(f"Usage: {sys.argv[0]} <log_prefix>")
         sys.exit(1)
     
-    log_dir = "/var/log/apache2"
+    log_dir = "/Users/parents/Developer/log/apache2"
     log_prefix = sys.argv[1]
-    log_type = "access"
-    log_path = f"{log_dir}/{log_prefix}.{log_type}.log"
 
-    processLogs(log_path)
+    processLogs(log_dir, log_prefix)
