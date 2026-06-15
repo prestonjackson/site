@@ -80,18 +80,43 @@ def logLineGenerator(path):
             for line in f:
                 yield line
 
-def logGenerator(log_dir, log_prefix):
     for path in pathlib.Path(log_dir).glob(f"*{log_prefix}.access*"):
         #print(f"{path}")
 
         if path.suffix == ".gz":
+            # Temporarily just keep things moving, don't worry about tgzs for now.
+            continue
             with gzip.open(path, 'rt') as f:
                 for line in f:
                     yield line
+
         elif path.suffix == ".log":
             with open(path) as f:
                 for line in f:
-                    yield line
+                    parts = line.split(" ")
+                    
+                    if len(parts) == 1 and parts[0] == '\n':
+                        continue
+                    
+                    # Src
+                    if src:
+                        src_val = parts[0]
+
+                    if start and end:
+                        date_format = "%d/%b/%Y:%H:%M:%S %z"
+                        raw_datetime = (parts[3] + " " + parts[4])[1:-1]
+                        time = datetime.datetime.strptime(raw_datetime, date_format)
+                        start_time = datetime.datetime.strptime(start, date_format)
+                        end_time = datetime.datetime.strptime(end, date_format)
+
+                    if status:
+                        status_val = parts[7]
+                        print(f"{status_val=}")
+
+                    if ((not src or src == src_val) and
+                        ((not start or not end) or (time > start_time and time < end_time)) and
+                        ((not status or status == status_val))):
+                        yield line
       
 def processLogs(log_path):
 
