@@ -99,24 +99,24 @@ def logLineGenerator(path):
                         continue
                     
                     # Src
-                    if src:
-                        src_val = parts[0]
+                    # if src:
+                    #     src_val = parts[0]
 
-                    if start and end:
-                        date_format = "%d/%b/%Y:%H:%M:%S %z"
-                        raw_datetime = (parts[3] + " " + parts[4])[1:-1]
-                        time = datetime.datetime.strptime(raw_datetime, date_format)
-                        start_time = datetime.datetime.strptime(start, date_format)
-                        end_time = datetime.datetime.strptime(end, date_format)
+                    # if start and end:
+                    #     date_format = "%d/%b/%Y:%H:%M:%S %z"
+                    #     raw_datetime = (parts[3] + " " + parts[4])[1:-1]
+                    #     time = datetime.datetime.strptime(raw_datetime, date_format)
+                    #     start_time = datetime.datetime.strptime(start, date_format)
+                    #     end_time = datetime.datetime.strptime(end, date_format)
 
-                    if status:
-                        status_val = parts[7]
-                        print(f"{status_val=}")
+                    # if status:
+                    #     status_val = parts[7]
+                    #     print(f"{status_val=}")
 
-                    if ((not src or src == src_val) and
-                        ((not start or not end) or (time > start_time and time < end_time)) and
-                        ((not status or status == status_val))):
-                        yield line
+                    # if ((not src or src == src_val) and
+                    #     ((not start or not end) or (time > start_time and time < end_time)) and
+                    #     ((not status or status == status_val))):
+                    #     yield line
       
 def processLogs(log_path):
 
@@ -191,7 +191,7 @@ if (__name__ == "__main__"):
             requests1 = processLogsSingleThreaded(log_dir, log_prefix)
         except Exception as e:
             print(f"Caught exception during single-threaded processing: {e}")
-            sys.exit(1)[
+            sys.exit(1)
 
     #with ProfilerManager() as p:
     #    requests2 = processLogsThreaded(log_dir, log_prefix)
