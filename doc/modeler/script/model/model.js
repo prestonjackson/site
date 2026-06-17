@@ -6,6 +6,7 @@ import { Camera } from "./camera.js";
 import { Grid } from "./grid.js";
 import { Point } from "../math/point.js";
 import { Mat4 } from "../math/mat4.js";
+import { Geometry } from "../math/geometry.js";
 
 /**
  * Model class - contains persistent data including topology, camera, and
@@ -62,5 +63,16 @@ export class Model {
 
   get grid() {
     return this.#grid;
+  }
+
+  /**
+   * Get the geometry of the entire model including topology and grid.
+   * @returns {Geometry}
+   */
+  getGeometry() {
+    const geometry = this.#topology.getGeometry();
+    const gridGeometry = this.#grid.topology.getGeometry();
+    geometry.union(gridGeometry);
+    return geometry;
   }
 }

@@ -14,7 +14,9 @@ export class Canvas {
   /** @type {GPUDevice?} */
   #device;
   /** @type {GPURenderPipeline?} */
-  #renderPipeline;
+  #trianglePipeline;
+  /** @type {GPURenderPipeline?} */
+  #linePipeline;
   /** @type {GPUVertexBufferLayout?} */
   #vertexBufferLayout;
   /** @type {GPUBuffer?} */
@@ -27,47 +29,57 @@ export class Canvas {
   #vertexBuffer;
   /** @type {number} */
   #vertexBufferSize = 0;
+  /** @type {GPUBuffer?} */
+  #lineIndexBuffer;
+  /** @type {number} */
+  #lineIndexBufferSize = 0;
+  /** @type {GPUBuffer?} */
+  #triangleIndexBuffer;
+  /** @type {number} */
+  #triangleIndexBufferSize = 0;
+  /** @type {GPUTexture?} */
+  #depthTexture = null;
+  /** @type {GPUTextureView?} */
+  #depthTextureView = null;
   /** @type {Size2} */
   #size;
   /** @type {number} */
-  #dpr;
-
+  #dpr = 1;
 
   /** 
    * @param {GPUCanvasContext} context
    * @param {Size2} size in pixels
    * @param {number} dpr device pixel ratio */
   constructor(context, size, dpr) {
-    // The webgpu context from the canvas element.
     this.#context = context;
     this.#size = size;
+    this.#dpr = dpr;
 
     this.#adapter = null;
     this.#device = null;
-    this.#renderPipeline = null;
+    this.#trianglePipeline = null;
+    this.#linePipeline = null;
     this.#vertexBufferLayout = null;
     this.#uniformBuffer = null;
     this.#bindGroup = null;
     this.#frameRequested = false;
 
     this.#vertexBuffer = null;
+    this.#lineIndexBuffer = null;
+    this.#triangleIndexBuffer = null;
   }
 
   async initialize() {
-    // Get WebGPU adapter (which reprents the GPU).
     this.#adapter = await navigator.gpu.requestAdapter();
     if (!this.#adapter) {
       throw new Error("WebGPU adapter not available");
     }
 
-    // Get device from adapter (represents a connection to the GPU).
     this.#device = await this.#adapter.requestDevice();
     if (!this.#device) {
       throw new Error("WebGPU device not available");
     }
 
-    // Configure context with device and preferred format. The format
-    // determines how colors are stored in the canvas texture.
     const format = navigator.gpu.getPreferredCanvasFormat();
     this.#context.configure({
       device: this.#device,
@@ -78,12 +90,10 @@ export class Canvas {
     const shaderResponse = await fetch("/modeler/script/gfx/triangle.wgsl");
     const shaderCode = await shaderResponse.text();
 
-    // Create shader module
     const shaderModule = this.#device.createShaderModule({
       code: shaderCode,
     });
 
-    // Define vertex buffer layout
     this.#vertexBufferLayout = {
       arrayStride: 12, // 3 floats * 4 bytes
       attributes: [
@@ -95,15 +105,11 @@ export class Canvas {
       ],
     };
 
-    // Create uniform buffer for view/projection matrices
-    // 2 matrices = 8 float4s = 32 floats = 128 bytes
     this.#uniformBuffer = this.#device.createBuffer({
       size: 128,
       usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
     });
 
-    // Create bind group layout, which describes the resources
-    // (buffers, textures) that will be bound to the shader.
     const bindGroupLayout = this.#device.createBindGroupLayout({
       entries: [
         {
@@ -114,12 +120,10 @@ export class Canvas {
       ],
     });
 
-    // Create pipeline layout with bind group
     const pipelineLayout = this.#device.createPipelineLayout({
       bindGroupLayouts: [bindGroupLayout],
     });
 
-    // Create bind group
     this.#bindGroup = this.#device.createBindGroup({
       layout: bindGroupLayout,
       entries: [
@@ -130,8 +134,16 @@ export class Canvas {
       ],
     });
 
-    // Create render pipeline
-    this.#renderPipeline = this.#device.createRenderPipeline({
+    // Create depth-stencil state common to both pipelines
+    /** @type {GPUDepthStencilState} */
+    const depthStencilState = {
+      depthWriteEnabled: true,
+      depthCompare: "less",
+      format: "depth24plus",
+    };
+
+    // Create Render Pipeline for Triangles (Faces)
+    this.#trianglePipeline = this.#device.createRenderPipeline({
       layout: pipelineLayout,
       vertex: {
         module: shaderModule,
@@ -141,16 +153,52 @@ export class Canvas {
       fragment: {
         module: shaderModule,
         entryPoint: "fs_main",
-        targets: [
-          {
-            format: format,
-          },
-        ],
+        targets: [{ format: format }],
       },
       primitive: {
         topology: "triangle-list",
       },
+      depthStencil: depthStencilState,
     });
+
+    // Create Render Pipeline for Lines (Edges/Grid)
+    this.#linePipeline = this.#device.createRenderPipeline({
+      layout: pipelineLayout,
+      vertex: {
+        module: shaderModule,
+        entryPoint: "vs_main",
+        buffers: [this.#vertexBufferLayout],
+      },
+      fragment: {
+        module: shaderModule,
+        entryPoint: "fs_main",
+        targets: [{ format: format }],
+      },
+      primitive: {
+        topology: "line-list",
+      },
+      depthStencil: depthStencilState,
+    });
+
+    this.recreateDepthTexture();
+  }
+
+  recreateDepthTexture() {
+    if (!this.#device) return;
+
+    if (this.#depthTexture) {
+      this.#depthTexture.destroy();
+    }
+
+    const width = Math.max(1, Math.floor(this.#size.w * this.#dpr));
+    const height = Math.max(1, Math.floor(this.#size.h * this.#dpr));
+
+    this.#depthTexture = this.#device.createTexture({
+      size: [width, height, 1],
+      format: "depth24plus",
+      usage: GPUTextureUsage.RENDER_ATTACHMENT,
+    });
+    this.#depthTextureView = this.#depthTexture.createView();
   }
 
   get size() {
@@ -160,6 +208,7 @@ export class Canvas {
   /** @param {Size2} size */
   set size(size) {
     this.#size = size;
+    this.recreateDepthTexture();
   }
 
   get dpr() {
@@ -169,22 +218,23 @@ export class Canvas {
   /** @param {number} dpr */
   set dpr(dpr) {
     this.#dpr = dpr;
+    this.recreateDepthTexture();
   }
 
   /**
-   * Main render function that draws the frame.
+   * Main render function that draws the frame using multi-pass index drawing.
    * @param {number} timestamp
    * @param {Mat4} model
    * @param {Mat4} view
    * @param {Mat4} projection
-   * @param {Map<Id, Point>} points 
-   * @param {Map<Id, Array<Id>>} lines
-   * @param {Map<Id, Array<Id>>} polygons
+   * @param {Map<any, Point>} points 
+   * @param {Map<any, Array<any>>} lines
+   * @param {Map<any, Array<any>>} polygons
    */
   renderFrame(timestamp,
               model, view, projection,
               points, lines, polygons) {
-    if (!this.#device) return;
+    if (!this.#device || !this.#uniformBuffer) return;
 
     // Update uniform buffer
     const uniformData = new Float32Array(32);
@@ -194,94 +244,111 @@ export class Canvas {
     }
     this.#device.queue.writeBuffer(this.#uniformBuffer, 0, uniformData);
 
-    // Map all of the points into a single vertex buffer, and create index
-    // buffers for lines and polygons.  
+    // Map points to indices
     const pointData = [];
     const pointIdMap = new Map();
     let pointIndex = 0;
     for (const [id, point] of points) {
-      pointIdMap.set(id, pointIndex);
+      // Use string representation of the ID to avoid object identity mismatch
+      const idKey = typeof id === "object" && id !== null ? id.toString() : id;
+      pointIdMap.set(idKey, pointIndex);
       pointData.push(point.x, point.y, point.z);
       pointIndex++;
     }
 
+    if (pointData.length === 0) return;
+
+    // Build line indices
     const lineIndexData = [];
-    const lineIdMap = new Map();
-    let lineIndex = 0;
     for (const [id, line] of lines) {
-      lineIdMap.set(id, lineIndex);
       const [v1, v2] = line;
-      lineIndexData.push(
-        pointIdMap.get(v1),
-        pointIdMap.get(v2)
-      );
-      lineIndex++;
+      const v1Key = typeof v1 === "object" && v1 !== null ? v1.toString() : v1;
+      const v2Key = typeof v2 === "object" && v2 !== null ? v2.toString() : v2;
+      const idx1 = pointIdMap.get(v1Key);
+      const idx2 = pointIdMap.get(v2Key);
+      if (idx1 !== undefined && idx2 !== undefined) {
+        lineIndexData.push(idx1, idx2);
+      }
     }
 
+    // Build polygon (triangle) indices
     const polygonIndexData = [];
-    const polygonIdMap = new Map();
-    let polygonIndex = 0;
     for (const [id, polygon] of polygons) {
-      polygonIdMap.set(id, polygonIndex);
       const [l1, l2, l3] = polygon;
-      polygonIndexData.push(
-        pointIdMap.get(lines.get(l1)?.[0] ?? 0),
-        pointIdMap.get(lines.get(l2)?.[0] ?? 0),
-        pointIdMap.get(lines.get(l3)?.[0] ?? 0)
-      );
-      polygonIndex++;
-    }
-  
-    // Flatten vertices into a buffer
-    /*const triangleVertices = [];
-    if (faces) {
-      for (const face of faces.values()) {
-        const vIds = new Set();
-        face.edges.forEach(edge => {
-          vIds.add(edge.v1);
-          vIds.add(edge.v2);
-        });
+      const l1Key = typeof l1 === "object" && l1 !== null ? l1.toString() : l1;
+      const l2Key = typeof l2 === "object" && l2 !== null ? l2.toString() : l2;
+      const l3Key = typeof l3 === "object" && l3 !== null ? l3.toString() : l3;
 
-        const vertexArray = Array.from(vIds).map(id => vertices.get(id));
-        if (vertexArray.length >= 3) {
-          for (let i = 0; i < 3; i++) {
-            triangleVertices.push(vertexArray[i].point.x, vertexArray[i].point.y, vertexArray[i].point.z);
-          }
+      const line1 = lines.get(l1Key);
+      const line2 = lines.get(l2Key);
+      const line3 = lines.get(l3Key);
+
+      if (line1 && line2 && line3) {
+        // Collect vertex indices from lines
+        const v1Key = typeof line1[0] === "object" && line1[0] !== null ? line1[0].toString() : line1[0];
+        const v2Key = typeof line2[0] === "object" && line2[0] !== null ? line2[0].toString() : line2[0];
+        const v3Key = typeof line3[0] === "object" && line3[0] !== null ? line3[0].toString() : line3[0];
+
+        const idx1 = pointIdMap.get(v1Key);
+        const idx2 = pointIdMap.get(v2Key);
+        const idx3 = pointIdMap.get(v3Key);
+
+        if (idx1 !== undefined && idx2 !== undefined && idx3 !== undefined) {
+          polygonIndexData.push(idx1, idx2, idx3);
         }
       }
-    }*/
-    const triangleVertices = [];
-    for (const index in polygonIndexData) {
-      triangleVertices.push(pointData[polygonIndexData[index] * 3]);
-      triangleVertices.push(pointData[polygonIndexData[index] * 3 + 1]);
-      triangleVertices.push(pointData[polygonIndexData[index] * 3 + 2]);
     }
 
-    if (triangleVertices.length === 0) return;
-
-    const data = new Float32Array(triangleVertices);
-    const byteLength = data.byteLength;
-
-    // Reallocate vertex buffer if needed (if it doesn't exist or is too small)
-    if (!this.#vertexBuffer || this.#vertexBufferSize < byteLength) {
-      if (this.#vertexBuffer) {
-        this.#vertexBuffer.destroy();
-      }
-
-      this.#vertexBufferSize = Math.max(byteLength, 1024); // Minimum size or exact
+    // Upload Vertex Buffer
+    const vertexData = new Float32Array(pointData);
+    const vertexByteLength = vertexData.byteLength;
+    if (!this.#vertexBuffer || this.#vertexBufferSize < vertexByteLength) {
+      if (this.#vertexBuffer) this.#vertexBuffer.destroy();
+      this.#vertexBufferSize = Math.max(vertexByteLength, 1024);
       this.#vertexBuffer = this.#device.createBuffer({
         size: this.#vertexBufferSize,
         usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
       });
     }
+    this.#device.queue.writeBuffer(this.#vertexBuffer, 0, vertexData);
 
-    // Write data to the existing buffer
-    this.#device.queue.writeBuffer(this.#vertexBuffer, 0, data);
+    // Upload Line Index Buffer
+    let hasLines = lineIndexData.length > 0;
+    if (hasLines) {
+      const lineIndices = new Uint32Array(lineIndexData);
+      const lineIndexByteLength = lineIndices.byteLength;
+      if (!this.#lineIndexBuffer || this.#lineIndexBufferSize < lineIndexByteLength) {
+        if (this.#lineIndexBuffer) this.#lineIndexBuffer.destroy();
+        this.#lineIndexBufferSize = Math.max(lineIndexByteLength, 512);
+        this.#lineIndexBuffer = this.#device.createBuffer({
+          size: this.#lineIndexBufferSize,
+          usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+        });
+      }
+      this.#device.queue.writeBuffer(this.#lineIndexBuffer, 0, lineIndices);
+    }
+
+    // Upload Triangle Index Buffer
+    let hasTriangles = polygonIndexData.length > 0;
+    if (hasTriangles) {
+      const triangleIndices = new Uint32Array(polygonIndexData);
+      const triangleIndexByteLength = triangleIndices.byteLength;
+      if (!this.#triangleIndexBuffer || this.#triangleIndexBufferSize < triangleIndexByteLength) {
+        if (this.#triangleIndexBuffer) this.#triangleIndexBuffer.destroy();
+        this.#triangleIndexBufferSize = Math.max(triangleIndexByteLength, 512);
+        this.#triangleIndexBuffer = this.#device.createBuffer({
+          size: this.#triangleIndexBufferSize,
+          usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+        });
+      }
+      this.#device.queue.writeBuffer(this.#triangleIndexBuffer, 0, triangleIndices);
+    }
 
     const commandEncoder = this.#device.createCommandEncoder();
     const textureView = this.#context.getCurrentTexture().createView();
 
-    const renderPass = commandEncoder.beginRenderPass({
+    /** @type {GPURenderPassDescriptor} */
+    const renderPassDesc = {
       colorAttachments: [
         {
           view: textureView,
@@ -290,16 +357,36 @@ export class Canvas {
           storeOp: "store",
         },
       ],
-    });
+    };
 
-    renderPass.setPipeline(this.#renderPipeline ?? null);
+    if (this.#depthTextureView) {
+      renderPassDesc.depthStencilAttachment = {
+        view: this.#depthTextureView,
+        depthClearValue: 1.0,
+        depthLoadOp: "clear",
+        depthStoreOp: "store",
+      };
+    }
+
+    const renderPass = commandEncoder.beginRenderPass(renderPassDesc);
     renderPass.setVertexBuffer(0, this.#vertexBuffer);
-
     if (this.#bindGroup) {
       renderPass.setBindGroup(0, this.#bindGroup);
     }
 
-    renderPass.draw(triangleVertices.length / 3);
+    // Pass 1: Render Lines (Grid & Edges)
+    if (hasLines && this.#linePipeline && this.#lineIndexBuffer) {
+      renderPass.setPipeline(this.#linePipeline);
+      renderPass.setIndexBuffer(this.#lineIndexBuffer, "uint32");
+      renderPass.drawIndexed(lineIndexData.length);
+    }
+
+    // Pass 2: Render Triangles (Faces)
+    if (hasTriangles && this.#trianglePipeline && this.#triangleIndexBuffer) {
+      renderPass.setPipeline(this.#trianglePipeline);
+      renderPass.setIndexBuffer(this.#triangleIndexBuffer, "uint32");
+      renderPass.drawIndexed(polygonIndexData.length);
+    }
 
     renderPass.end();
     this.#device.queue.submit([commandEncoder.finish()]);

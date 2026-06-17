@@ -87,7 +87,7 @@ class Application {
         new Size2(canvasElement.clientWidth, canvasElement.clientHeight),
         window.devicePixelRatio);
     this.#canvas.initialize().catch(err => {
-      throw new Error("Failed to initialize canvas:", err);
+      throw new Error("Failed to initialize canvas: " + err);
     });
 
     // Register canvas mouse event listeners.
@@ -186,7 +186,7 @@ class Application {
         const viewTransform = this.#model.camera.viewTransform;
         const projectionTransform = this.#model.camera.projectionTransform;
 
-        const geometry = this.#model.topology.getGeometry();
+        const geometry = this.#model.getGeometry();
 
         this.#canvas.renderFrame(
           timestamp,

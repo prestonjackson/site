@@ -6,6 +6,7 @@ import { Vertex } from "./vertex.js";
 import { Edge } from "./edge.js";
 import { Face } from "./face.js";
 import { Point } from "../math/point.js";
+import { Geometry } from "../math/geometry.js";
 
 /**
  * Topology class - contains the geometric structure using Vertex, Edge, and Face objects.
@@ -188,24 +189,23 @@ export class Topology {
     this.#faces.clear();
   }
 
-  /** @returns {{points: Map<Id, Point>, lines: Map<Id, Array<Id>>, polygons: Map<Id, Array<Id>>}} */
+  /**
+   * Get the geometry representation of the topology.
+   * @returns {Geometry}
+   */
   getGeometry() {
-    return {
-      points:
-        Array.from(this.#vertices.entries()).reduce((map, [id, vertex]) => {
-          map.set(id, vertex.point);
-          return map;
-      }, new Map()),
-      lines:
-        Array.from(this.#edges.entries()).reduce((map, [id, edge]) => {
-          map.set(id, edge.vertexIds);
-          return map;
-      }, new Map()),
-      polygons:
-        Array.from(this.#faces.entries()).reduce((map, [id, face]) => {
-          map.set(id, face.edgeIds);
-          return map;
-      }, new Map())
-    };
+    const geometry = new Geometry();
+
+    this.#vertices.forEach((vertex, id) => {
+      geometry.points.set(id, vertex.point);
+    });
+    this.#edges.forEach((edge, id) => {
+      geometry.lines.set(id, edge.vertexIds);
+    });
+    this.#faces.forEach((face, id) => {
+      geometry.polygons.set(id, face.edgeIds);
+    });
+
+    return geometry;
   }
 }
