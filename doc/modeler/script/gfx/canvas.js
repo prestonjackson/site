@@ -391,4 +391,47 @@ export class Canvas {
     renderPass.end();
     this.#device.queue.submit([commandEncoder.finish()]);
   }
+
+
+   renderFrame(timestamp, model, view, projection, points, lines, polygons) {                     
+      if (!this.#device || !this.#uniformBuffer) return;                                           
+                                                                                                   
+      // 1. Update uniform camera matrices                                                         
+      projection.data.forEach((val, idx) => uniformData[16 + idx] = val);                          
+      this.#device.queue.writeBuffer(this.#uniformBuffer, 0, uniformData);                         
+                                                                                                   
+      // 2. Pack topological maps into structured buffers                                          
+      const geometry = new Geometry(points, lines, polygons);                                      
+      const packed = GeometryPacker.pack(geometry);                                                
+                                                                                                   
+      if (packed.vertices.length === 0) return;                                                    
+                                                                                                   
+      // 3. Write data to dynamic buffers                                                          
+      this.#vertexBuffer.write(packed.vertices);                                                   
+      this.#lineBuffer.write(packed.lines);                                                        
+      this.#triangleBuffer.write(packed.triangles);                                                
+                                                                                                   
+      // 4. Encode & Submit Render Pass                                                            
+      const commandEncoder = this.#device.createCommandEncoder();                                  
+      const renderPass = commandEncoder.beginRenderPass(this.getRenderPassDescriptor());           
+                                                                                                   
+      renderPass.setVertexBuffer(0, this.#vertexBuffer.buffer);                                    
+      renderPass.setBindGroup(0, this.#bindGroup);                                                 
+                                                                                                   
+      if (packed.lines.length > 0) {                                                               
+        renderPass.setPipeline(this.#linePipeline);                                                
+        renderPass.setIndexBuffer(this.#lineBuffer.buffer, "uint32");                              
+        renderPass.drawIndexed(packed.lines.length);                                               
+      }                                                                                            
+                                                                                                   
+      if (packed.triangles.length > 0) {                                                           
+        renderPass.setPipeline(this.#trianglePipeline);                                            
+        renderPass.setIndexBuffer(this.#triangleBuffer.buffer, "uint32");                          
+        renderPass.drawIndexed(packed.triangles.length);                                           
+      }                                                                                            
+                                                                                                   
+      renderPass.end();                                                                            
+      this.#device.queue.submit([commandEncoder.finish()]);                                        
+    }                                                                                              
+                     
 }
