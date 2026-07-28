@@ -103,7 +103,7 @@ export class Canvas {
     });
 
     // Load shader from file
-    const shaderResponse = await fetch("/modeler/script/gfx/triangle.wgsl");
+    const shaderResponse = await fetch("/modeler/script/gfx/shaders.wgsl");
     const shaderCode = await shaderResponse.text();
 
     const shaderModule = this.#device.createShaderModule({
