@@ -31,7 +31,7 @@ Personal website & learning project exploring local-first development, collabora
     - **canvas.js** — WebGPU renderer (adapter/device init, pipeline setup, dirty-flag render loop)
     - **model.js** — Geometry manager (vertices/edges/faces, GPU buffers, dirty flag system)
     - **camera.js** — Camera control (position/target/up, truck/dolly/orbit, view/projection matrices, raycasting)
-    - **triangle.wgsl** — WebGPU shader code (vertex/fragment shaders in WGSL)
+    - **shaders.wgsl** — WebGPU shader code (vertex/fragment shaders in WGSL)
   - **Math Library** (`math/` subdirectory):
     - **vec3.js** — 3D vector class (add, subtract, scale, dot, cross, normalize, length)
     - **mat4.js** — 4×4 matrix class (multiply, transpose, transformPoint, lookAt, perspective, invert)
@@ -136,13 +136,13 @@ All CSS values use variables—enables rapid theming with zero CSS duplication.
 ### Rendering Pipeline
 **Canvas Class** (`canvas.js`):
 - Initializes WebGPU adapter, device, and render context
-- Creates render pipeline with shader module loaded from `triangle.wgsl`
+- Creates render pipeline with shader module loaded from `shaders.wgsl`
 - Implements dirty-flag render optimization: only schedules frames when `model.dirty = true`
 - Manages uniform buffer for camera view/projection matrices
 - Implements `render()` callback with proper bind group setup and draw calls
 
 **Shader Files** (`.wgsl`):
-- `triangle.wgsl` — Vertex and fragment shaders for 3D geometry rendering
+- `shaders.wgsl` — Vertex and fragment shaders for 3D geometry rendering
 - Vertex shader: Transforms vertices via view/projection matrices
 - Fragment shader: Colors fragments based on layer (faces, edges, vertices)
 
@@ -213,7 +213,7 @@ script/
 ├── signaler.js            (WebRTC signaling)
 ├── connection.js          (RTCPeerConnection)
 ├── app.js                 (Main controller)
-├── triangle.wgsl          (Shader code)
+├── shaders.wgsl          (Shader code)
 ├── math/
 │   ├── vec3.js            (3D vectors)
 │   └── mat4.js            (4×4 matrices)
