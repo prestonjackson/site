@@ -2,6 +2,7 @@
 "use strict";
 
 import { Id } from "../util/id.js";
+import { Curve } from "../math/curve.js";
 
 /**
  * Edge - represents a connection between two vertices.
@@ -9,43 +10,40 @@ import { Id } from "../util/id.js";
 export class Edge {
   /** @type {Id} */
   #id;
-  /** @type {Array<Id>} */
-  #vertexIds;
+  /** @type {Curve} */
+  #curve;
 
   /**
    * Create an edge between two vertices.
    * @param {Array<Id>} vertexIds
    */
   constructor(vertexIds) {
-    if (!Array.isArray(vertexIds) || vertexIds.length !== 2) {
-      throw new Error("Edge requires an array of exactly 2 vertex IDs");
-    }
     this.#id = new Id();
-    this.#vertexIds = [...vertexIds];  // Copy the array.
+    this.#curve = new Curve(vertexIds);
   }
 
   /**
    * Get the first vertex of this edge.
    * @returns {Id}
    */
-  get v1() {
-    return this.#vertexIds[0];
+  get v0() {
+    return this.#curve.v0;
   }
 
-  set v1(id) {
-    this.#vertexIds[0] = id;
+  set v0(id) {
+    this.#curve.v0 = id;
   }
 
   /**
    * Get the second vertex of this edge.
    * @returns {Id}
    */
-  get v2() {
-    return this.#vertexIds[1];
+  get v1() {
+    return this.#curve.v1;
   }
 
-  set v2(id) {
-    this.#vertexIds[1] = id;
+  set v1(id) {
+    this.#curve.v1 = id;
   }
 
   /**
@@ -53,7 +51,7 @@ export class Edge {
    * @returns {Array<Id>}
    */
   get vertexIds() {
-    return [...this.#vertexIds];
+    return [this.#curve.v0, this.#curve.v1];
   }
 
   /**
