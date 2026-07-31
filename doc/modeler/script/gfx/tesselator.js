@@ -6,6 +6,10 @@
  */
 
 class Tesselator {
+
+/**
+ * Tesselate a curve into a set of lines. This is a placeholder for the actual tesselation logic.
+
 /** 
  * @param {number[]} data - Flat array of vertices [x0, y0, x1, y1, ...]
  * @returns {number[]} Array of vertex indices grouped by 3s forming triangles.
@@ -101,6 +105,7 @@ class Tesselator {
 
   /** @param {number} i @param {number} x @param {number} y @param {any} last @returns {any} */
   static #insertNode(i, x, y, last) {
+      /** @type {any} */
       const p = { i, x, y, prev: null, next: null };
       if (!last) {
           p.prev = p;

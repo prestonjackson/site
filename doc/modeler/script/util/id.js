@@ -14,7 +14,12 @@ export class Id {
     this.#data = new Uint32Array(1);
     // Force into a 32-bit unsigned integer range
     if (value === undefined || value === null) {
-      window.crypto.getRandomValues(this.#data);
+      // I don't understand why this is necessary, but it seems that crypto.
+      // getRandomValues does not work correctly with a Uint32Array stored as
+      // an instance variable, so we use a temporary array.
+      let tmp = new Uint32Array(1);
+      crypto.getRandomValues(tmp);
+      this.#data[0] = tmp[0];
     } else {
       this.#data[0] = value >>> 0;
     }
@@ -24,20 +29,22 @@ export class Id {
    * Returns the ID as a numerical index.
    * @returns {number}
    */
-  toIndex() {
+  toNumber() {
     return this.#data[0];
   }
 
   /**
-   * Returns the ID as a 8-character hex string.
+   * Returns the ID as a base64 string.
    * @returns {string}
    */
-  toString() {
-    const bytes = new Uint8Array(this.#data.buffer);
-    return bytes.toBase64({
-      alphabet: "base64url",
-      omitPadding: true
-    });
+  toBase64() {
+    // Read the data as a Uint8Array for base64 encoding
+    const byteArray = new Uint8Array(this.#data.buffer);
+    const base64Str = btoa(String.fromCharCode(...byteArray))
+      .replace(/\+/g, '-')
+      .replace(/\//g, '_')
+      .replace(/=+$/, '');
+    return base64Str;
   }
 
   /**

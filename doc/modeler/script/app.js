@@ -193,9 +193,7 @@ class Application {
           modelTransform,
           viewTransform,
           projectionTransform,
-          geometry.points,
-          geometry.lines,
-          geometry.polygons
+          geometry
         );
 
         this.#renderRequested = false;
