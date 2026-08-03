@@ -1,7 +1,7 @@
 // @ts-check
 "use strict";
 
-import { Id } from "../util/id";
+import { Id } from "../util/id.js";
 
 // This Surface class represents a 3D surface defined by a set of control
 // points. It provides methods to export to a triangles for rendering. For now,

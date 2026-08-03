@@ -11,11 +11,11 @@ import { Id } from "../util/id.js";
  */
 export class Geometry {
   /** @type {Map<Id, Point>} */
-  #points;
+  points;
   /** @type {Map<Id, Curve>} */
-  #curves;
+  curves;
   /** @type {Map<Id, Surface>} */
-  #surfaces;
+  surfaces;
 
   /** @type {number} */
   kPointStride = 3;  // x, y, z
@@ -25,9 +25,9 @@ export class Geometry {
   kTriangleStride = 3; // three point indices per triangle
 
   constructor() {
-    this.#points = new Map();
-    this.#curves = new Map();
-    this.#surfaces = new Map();
+    this.points = new Map();
+    this.curves = new Map();
+    this.surfaces = new Map();
   }
 
   /**
@@ -35,14 +35,14 @@ export class Geometry {
    * @param {Geometry} other - The other geometry to union.
    */
   union(other) {
-    for (const [id, point] of other.#points) {
-      this.#points.set(id, point);
+    for (const [id, point] of other.points) {
+      this.points.set(id, point);
     }
-    for (const [id, curve] of other.#curves) {
-      this.#curves.set(id, curve);
+    for (const [id, curve] of other.curves) {
+      this.curves.set(id, curve);
     }
-    for (const [id, surface] of other.#surfaces) {
-      this.#surfaces.set(id, surface);
+    for (const [id, surface] of other.surfaces) {
+      this.surfaces.set(id, surface);
     }
   }
 
@@ -55,10 +55,10 @@ export class Geometry {
   pack() {
     // Create an array of point data, and a mapping from point IDs to their
     // indices in the array
-    const pointData = new Float32Array(this.#points.size * this.kPointStride);
+    const pointData = new Float32Array(this.points.size * this.kPointStride);
     const pointIdToIndexMap = new Map();
     let pointIndex = 0;
-    for (const [id, point] of this.#points) {
+    for (const [id, point] of this.points) {
       pointIdToIndexMap.set(id.toNumber(), pointIndex);
       
       const dataOffset = pointIndex * this.kPointStride;
@@ -70,7 +70,7 @@ export class Geometry {
 
     // Tesselate curves into lines.
     const linePointIds = [];
-    for (const [_, curve] of this.#curves) {
+    for (const [_, curve] of this.curves) {
       const lines = curve.tesselate();
       linePointIds.push(...lines);
     }
@@ -84,7 +84,7 @@ export class Geometry {
 
     // Tesselate surfaces into triangles.
     const trianglePointIds = [];
-    for (const [_, surface] of this.#surfaces) {
+    for (const [_, surface] of this.surfaces) {
       const triangles = surface.tesselate();
       trianglePointIds.push(...triangles);
     }

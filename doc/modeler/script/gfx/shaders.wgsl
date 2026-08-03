@@ -22,7 +22,7 @@ fn vs_main(input: VertexInput) -> VertexOutput {
   let viewPos = uniforms.view * worldPos;
   let clipPos = uniforms.projection * viewPos;
   output.position = clipPos;
-  output.color = vec3f(0.2, 0.2, 0.2);
+  output.color = vec3f(1.0, 0.0, 0.0);
   return output;
 }
 

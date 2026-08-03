@@ -47,11 +47,11 @@ export class Edge {
   }
 
   /**
-   * Get both vertices of this edge.
-   * @returns {Array<Id>}
+   * Get the curve of this edge.
+   * @returns {Curve}
    */
-  get vertexIds() {
-    return [this.#curve.v0, this.#curve.v1];
+  get curve() {
+    return this.#curve;
   }
 
   /**

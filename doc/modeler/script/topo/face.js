@@ -1,6 +1,7 @@
 // @ts-check
 "use strict";
 
+import { Surface } from "../math/surface.js";
 import { Id } from "../util/id.js";
 
 /*
@@ -12,6 +13,8 @@ export class Face {
   #id;
   /** @type {Array<Id>} */
   #edgeIds;
+  /** @type {Surface} */
+  #surface;
 
   /**
    * @param {Array<Id>} edgeIds
@@ -22,6 +25,7 @@ export class Face {
     }
     this.#id = new Id();
     this.#edgeIds = [...edgeIds];  // Copy the array.
+    this.#surface = new Surface(this.#edgeIds);
   }
 
   /**
@@ -39,6 +43,13 @@ export class Face {
     this.#edgeIds = [...edgeIds];  // Copy the array.
   }
 
+  /**
+   * Get ths surface representation
+   * @returns {Surface}
+   */
+  get surface() {
+    return this.#surface;
+  }
   /**
    * @returns {Id}
    */

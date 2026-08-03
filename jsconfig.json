@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "allowJs": true,
+    "checkJs": true
+  },
+  "include": [
+    "**/*.js",
+    "**/*.d.ts"
+  ]
+}

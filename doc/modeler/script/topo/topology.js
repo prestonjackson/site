@@ -99,7 +99,7 @@ export class Topology {
    */
   updateEdge(id, vertexIds) {
     const edge = this.readEdge(id);
-    [edge.v1, edge.v2] = vertexIds;
+    [edge.v0, edge.v1] = vertexIds;
     return edge.id;
   }
 
@@ -200,10 +200,10 @@ export class Topology {
       geometry.points.set(id, vertex.point);
     });
     this.#edges.forEach((edge, id) => {
-      geometry.lines.set(id, edge.vertexIds);
+      geometry.curves.set(id, edge.curve);
     });
     this.#faces.forEach((face, id) => {
-      geometry.polygons.set(id, face.edgeIds);
+      geometry.surfaces.set(id, face.surface);
     });
 
     return geometry;

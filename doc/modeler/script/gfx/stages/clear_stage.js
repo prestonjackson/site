@@ -1,7 +1,7 @@
 // @ts-check
 "use strict";
 
-import { Color } from "../../math/color";
+import { Color } from "../../math/color.js";
 
 // A stage that clears the color and depth buffers at the start of a render
 // pass.
@@ -9,7 +9,7 @@ export class ClearStage {
   static CLEAR_COLOR = new Color(0.95, 0.95, 0.95, 1.0);  // light gray
   
   /**
-   * @param {Color} clearColor
+   * @param {Color?} clearColor
    */
   constructor(clearColor) {
     this.clearColor = clearColor ?? ClearStage.CLEAR_COLOR;
@@ -38,7 +38,6 @@ export class ClearStage {
         depthStoreOp: "store",
       }
     };
-
     return descriptor;
   }
 }
