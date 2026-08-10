@@ -44,6 +44,10 @@ export class Canvas {
   /** @type {number} */
   #vertexBufferSize = 0;
   /** @type {GPUBuffer?} */
+  #pointIndexBuffer;
+  /** @type {number} */
+  #pointIndexBufferSize = 0;
+  /** @type {GPUBuffer?} */
   #lineIndexBuffer;
   /** @type {number} */
   #lineIndexBufferSize = 0;
@@ -82,6 +86,7 @@ export class Canvas {
     this.#frameRequested = false;
 
     this.#vertexBuffer = null;
+    this.#pointIndexBuffer = null;
     this.#lineIndexBuffer = null;
     this.#triangleIndexBuffer = null;
   }
@@ -275,20 +280,38 @@ export class Canvas {
     // Provide the list of vertices, lines, and triangles.
     const data = geometry.pack()
 
-    // Upload Vertex Buffer
-    const pointsNumBytes = data.pointData.byteLength;
-    if (pointsNumBytes > 0) {
-      if (!this.#vertexBuffer || this.#vertexBufferSize < pointsNumBytes) {
+    // Upload Point Data
+    const vertexNumBytes = data.pointData.byteLength;
+    if (vertexNumBytes > 0) {
+      if (!this.#vertexBuffer || this.#vertexBufferSize < vertexNumBytes) {
         if (this.#vertexBuffer) {
           this.#vertexBuffer.destroy();
         }
-        this.#vertexBufferSize = pointsNumBytes;
+        this.#vertexBufferSize = vertexNumBytes;
         this.#vertexBuffer = this.#device.createBuffer({
           size: this.#vertexBufferSize,
           usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
         });
       }
       this.#device.queue.writeBuffer(this.#vertexBuffer, 0, data.pointData);
+    }
+
+    // Upload Point Index Buffer
+    const pointsNumBytes = data.pointIndices.byteLength;
+    if (pointsNumBytes > 0) {
+      if (!this.#pointIndexBuffer
+        || this.#pointIndexBufferSize < pointsNumBytes) {
+        if (this.#pointIndexBuffer) {
+          this.#pointIndexBuffer.destroy();
+        }
+        this.#pointIndexBufferSize = pointsNumBytes;
+        this.#pointIndexBuffer = this.#device.createBuffer({
+          size: this.#pointIndexBufferSize,
+          usage: GPUBufferUsage.INDEX | GPUBufferUsage.COPY_DST,
+        });
+      }
+      this.#device.queue.writeBuffer(this.#pointIndexBuffer, 0,
+                                     data.pointIndices);
     }
 
     // Upload Line Index Buffer
@@ -340,10 +363,11 @@ export class Canvas {
     if (this.#bindGroup) {
       renderPass.setBindGroup(0, this.#bindGroup);
     }
-    
-    this.#pointStage?.render(renderPass, data.pointData.length/3);
-    //this.#lineStage?.render(renderPass, this.#lineIndexBuffer,
-    //                        data.lineIndices.length/2);
+     
+    this.#pointStage?.render(renderPass, this.#pointIndexBuffer,
+                             data.pointIndices.length);
+    this.#lineStage?.render(renderPass, this.#lineIndexBuffer,
+                            data.lineIndices.length/2);
     //this.#triangleStage?.render(renderPass, this.#triangleIndexBuffer,
     //                            data.triangleIndices.length);
 

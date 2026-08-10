@@ -49,6 +49,7 @@ export class Geometry {
   /**
    * Pack the geometry into a compact representation suitable for GPU buffers.
    * @returns {{pointData: Float32Array,
+   *            pointIndices: Uint32Array,
    *            lineIndices: Uint32Array,
    *            triangleIndices: Uint32Array}} - The packed data.
    */
@@ -66,6 +67,14 @@ export class Geometry {
       pointData[dataOffset + 1] = point.y;
       pointData[dataOffset + 2] = point.z;
       pointIndex += 1;
+    }
+
+    // Create an array of point indices for points.
+    const pointIndices = new Uint32Array(this.points.size);
+    let i = 0;
+    for (const [id, _] of this.points) {
+      pointIndices[i] = pointIdToIndexMap.get(id.toNumber());
+      i++;
     }
 
     // Tesselate curves into lines.
@@ -98,6 +107,7 @@ export class Geometry {
 
     return {
       pointData: pointData,
+      pointIndices: pointIndices,
       lineIndices: lineIndices,
       triangleIndices: triangleIndices
     };                                                                         

@@ -4,7 +4,7 @@ struct VertexInput {
 
 struct VertexOutput {
   @builtin(position) position: vec4f,
-  @location(0) color: vec3f,
+  @location(0) color: vec3f,  
 }
 
 struct Uniforms {

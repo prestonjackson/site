@@ -32,12 +32,14 @@ export class PointStage {
 
   /**
    * @param {GPURenderPassEncoder} renderPass
-   * @param {number} vertexCount
+   * @param {GPUBuffer | null} indexBuffer
+   * @param {number} indexCount
    */
-  render(renderPass, vertexCount) {
-    if (vertexCount <= 0) return;
+  render(renderPass, indexBuffer, indexCount) {
+    if (!indexBuffer || indexCount <= 0) return;
 
     renderPass.setPipeline(this.pipeline);
-    renderPass.draw(vertexCount);
+    renderPass.setIndexBuffer(indexBuffer, "uint32");
+    renderPass.draw(indexCount);
   }
 }
