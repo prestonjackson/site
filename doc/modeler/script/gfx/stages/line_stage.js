@@ -32,11 +32,11 @@ export class LineStage {
 
   /**
    * @param {GPURenderPassEncoder} renderPass
-   * @param {GPUBuffer|null} indexBuffer
+   * @param {GPUBuffer} indexBuffer
    * @param {number} indexCount
    */
   render(renderPass, indexBuffer, indexCount) {
-    if (!indexBuffer || indexCount <= 0) return;
+    if (indexCount <= 0) return;
 
     renderPass.setPipeline(this.pipeline);
     renderPass.setIndexBuffer(indexBuffer, "uint32");

@@ -363,14 +363,18 @@ export class Canvas {
     if (this.#bindGroup) {
       renderPass.setBindGroup(0, this.#bindGroup);
     }
-     
-    this.#pointStage?.render(renderPass, this.#pointIndexBuffer,
-                             data.pointIndices.length);
-    this.#lineStage?.render(renderPass, this.#lineIndexBuffer,
-                            data.lineIndices.length/2);
-    //this.#triangleStage?.render(renderPass, this.#triangleIndexBuffer,
-    //                            data.triangleIndices.length);
+    
+    if (this.#pointIndexBuffer
+        && this.#lineIndexBuffer
+        && this.#triangleIndexBuffer) {
 
+      this.#pointStage?.render(renderPass, this.#pointIndexBuffer,
+                               data.pointIndices.length);
+      this.#lineStage?.render(renderPass, this.#lineIndexBuffer,
+                              data.lineIndices.length);
+      //this.#triangleStage?.render(renderPass, this.#triangleIndexBuffer,
+      //                            data.triangleIndices.length);
+    }
     renderPass.end();
     this.#device.queue.submit([commandEncoder.finish()]);
   }

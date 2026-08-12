@@ -86,9 +86,11 @@ class Application {
     this.#canvas = new Canvas(context,
         new Size2(canvasElement.clientWidth, canvasElement.clientHeight),
         window.devicePixelRatio);
-    this.#canvas.initialize().catch(err => {
-      throw new Error("Failed to initialize canvas: " + err);
-    });
+    this.#canvas.initialize()
+        .then(() => this.requestRender())
+        .catch(err => {
+          throw new Error("Failed to initialize canvas: " + err);
+        });
 
     // Register canvas mouse event listeners.
     canvasElement.addEventListener('mousedown', (e) => this.onCanvasMouseDown(e));

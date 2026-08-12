@@ -26,7 +26,6 @@ export class Model {
   constructor() {
     // Topological data (geometric structure)
     this.#topology = new Topology();
-    this.insertTestGeometry();
 
     // Camera for view/projection matrices
     this.#camera = new Camera();
