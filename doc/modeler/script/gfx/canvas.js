@@ -199,14 +199,14 @@ export class Canvas {
       depthStencilState
     );
 
-    // this.#triangleStage = new TriangleStage(
-    //   this.#device,
-    //   pipelineLayout,
-    //   this.#vertexBufferLayout,
-    //   shaderModule,
-    //   format,
-    //   depthStencilState
-    // );
+    this.#triangleStage = new TriangleStage(
+      this.#device,
+      pipelineLayout,
+      this.#vertexBufferLayout,
+      shaderModule,
+      format,
+      depthStencilState
+    );
 
     this.recreateDepthTexture();
   }
@@ -368,12 +368,12 @@ export class Canvas {
         && this.#lineIndexBuffer
         && this.#triangleIndexBuffer) {
 
-      this.#pointStage?.render(renderPass, this.#pointIndexBuffer,
-                               data.pointIndices.length);
       this.#lineStage?.render(renderPass, this.#lineIndexBuffer,
                               data.lineIndices.length);
-      //this.#triangleStage?.render(renderPass, this.#triangleIndexBuffer,
-      //                            data.triangleIndices.length);
+      this.#pointStage?.render(renderPass, this.#pointIndexBuffer,
+                               data.pointIndices.length);
+      this.#triangleStage?.render(renderPass, this.#triangleIndexBuffer,
+                                  data.triangleIndices.length);
     }
     renderPass.end();
     this.#device.queue.submit([commandEncoder.finish()]);

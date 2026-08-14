@@ -76,7 +76,18 @@ export class Topology {
    * @param {Array<Id>} vertexIds @returns {Id}
    */
   createEdge(vertexIds) {
-    const edge = new Edge(vertexIds);
+    // Convert IDs to vertices
+    const vertices = [];
+    for (const id of vertexIds) {
+      const vertex = this.#vertices.get(id);
+      if (vertex) {
+        vertices.push(vertex);
+      } else {
+        throw new Error(`Vertex with ID ${id} not found`);
+      }
+    }
+    // Create the Edge and store it.
+    const edge = new Edge(vertices);
     this.#edges.set(edge.id, edge);
     return edge.id;
   }
@@ -99,7 +110,7 @@ export class Topology {
    */
   updateEdge(id, vertexIds) {
     const edge = this.readEdge(id);
-    [edge.v0, edge.v1] = vertexIds;
+    throw new Error(`Unimplemented ${id}`);
     return edge.id;
   }
 
@@ -120,7 +131,18 @@ export class Topology {
     if (!Array.isArray(edgeIds) || edgeIds.length < 3) {
       throw new Error("Face requires an array of at least 3 edge IDs");
     }
-    const face = new Face(edgeIds);
+    // Convert IDs to edges.
+    const edges = []
+    for (const id of edgeIds) {
+      const edge = this.#edges.get(id);
+      if (edge) {
+        edges.push(edge);
+      } else {
+        throw new Error(`Edge with ID ${id} not found`);
+      }
+    }
+    // Create the Face and store it.
+    const face = new Face(edges);
     this.#faces.set(face.id, face);
     return face.id;
   }
@@ -143,7 +165,7 @@ export class Topology {
    */
   updateFace(id, edgeIds) {
     const face = this.readFace(id);
-    face.edgeIds = edgeIds;
+    throw new Error(`Unimplemented ${id}`);
     return face.id;
   }
 
@@ -194,17 +216,20 @@ export class Topology {
    * @returns {Geometry}
    */
   getGeometry() {
-    const geometry = new Geometry();
-
+    const vertices = new Map();
     this.#vertices.forEach((vertex, id) => {
-      geometry.points.set(id, vertex.point);
+      vertices.set(id.toNumber(), vertex.point);
     });
+    const curves = new Map();
     this.#edges.forEach((edge, id) => {
-      geometry.curves.set(id, edge.curve);
+      curves.set(id.toNumber(), edge.curve);
     });
+    const surfaces = new Map();
     this.#faces.forEach((face, id) => {
-      geometry.surfaces.set(id, face.surface);
+      surfaces.set(id.toNumber(), face.surface);
     });
+
+    const geometry = new Geometry(vertices, curves, surfaces);
 
     return geometry;
   }

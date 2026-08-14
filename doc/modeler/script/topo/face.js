@@ -2,6 +2,7 @@
 "use strict";
 
 import { Surface } from "../math/surface.js";
+import { Edge } from "./edge.js";
 import { Id } from "../util/id.js";
 
 /*
@@ -11,21 +12,23 @@ import { Id } from "../util/id.js";
 export class Face {
   /** @type {Id} */
   #id;
-  /** @type {Array<Id>} */
-  #edgeIds;
+  /** @type {Array<Edge>} */
+  #edges;
   /** @type {Surface} */
   #surface;
 
   /**
-   * @param {Array<Id>} edgeIds
+   * @param {Array<Edge>} edges
    */
-  constructor(edgeIds) {
-    if (!Array.isArray(edgeIds) || edgeIds.length < 3) {
-      throw new Error("Face requires an array of at least 3 edge IDs");
+  constructor(edges) {
+    if (edges.length < 3) {
+      throw new Error("Face requires an array of at least 3 edges");
     }
     this.#id = new Id();
-    this.#edgeIds = [...edgeIds];  // Copy the array.
-    this.#surface = new Surface(this.#edgeIds);
+    this.#edges = [...edges];  // Copy the array.
+    
+    const curves = this.#edges.map(edge => edge.curve);
+    this.#surface = new Surface(curves, []);
   }
 
   /**
@@ -33,14 +36,15 @@ export class Face {
    * @returns {Array<Id>}
    */
   get edgeIds() {
-    return [...this.#edgeIds];  // Return a copy of the array.
+    const ids = this.#edges.map(edge => edge.id);
+    return [...ids];  // Return a copy of the array.
   }
 
   /** Set the edges of this face.
-   * @param {Array<Id>} edgeIds
+   * @param {Array<Edge>} edges
    */
-  set edgeIds(edgeIds) {
-    this.#edgeIds = [...edgeIds];  // Copy the array.
+  set edgeIds(edges) {
+    this.#edges = [...edges];  // Copy the array.
   }
 
   /**

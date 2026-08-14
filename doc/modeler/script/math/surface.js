@@ -1,7 +1,8 @@
 // @ts-check
 "use strict";
 
-import { Id } from "../util/id.js";
+import { Curve } from "./curve.js";
+import { Point } from "./point.js";
 
 // This Surface class represents a 3D surface defined by a set of control
 // points. It provides methods to export to a triangles for rendering. For now,
@@ -11,46 +12,42 @@ import { Id } from "../util/id.js";
 // FUTURE, add support for more complex surfaces such as NURBS.  
 
 export class Surface {
-  /** @type {Array<Id>} */
-  #controlPoints;
+  /** @type {Array<Curve>} Boundary curves */
+  #curves;
+  /** @type {Array<Point>} Control points */
+  #controls;
 
-  /** @param {Array<Id>} controlPoints */
-  constructor(controlPoints) {
-    this.#controlPoints = [...controlPoints];
+  /** @param {Array<Curve>} curves @param {Array<Point>} controls */
+  constructor(curves, controls) {
+    if (curves.length < 3) {
+      throw new Error("A surface must have at least 3 boundary curves");
+    }
+    this.#curves = [...curves];
+    this.#controls = [...controls];
   }
 
-  get v0() {
-    return this.#controlPoints[0];
+  /**
+   * Get the boundary curves defining the surface.
+   * @returns {Array<Curve>} The array of curves.
+   */
+  get curves() {
+    return this.#curves;
   }
 
-  /** @param {Id} id */
-  set v0(id) {
-    this.#controlPoints[0] = id;
+  /**
+   * Get the control points for the surface.
+   * @returns {Array<Point>} The array of control points.
+   */
+  get controls() {
+    return this.#controls;
   }
 
-  /** @returns {Id} */
-  get v1() {
-    return this.#controlPoints[1];
-  }
-
-  /** @param {Id} id */
-  set v1(id) {
-    this.#controlPoints[1] = id;
-  }
-
-  /** @returns {Id} */
-  get v2() {
-    return this.#controlPoints[2];
-  }
-
-  /** @param {Id} id */
-  set v2(id) {
-    this.#controlPoints[2] = id;
-  }
-
-  /** returns {Array<Id>} */
+  /** @returns {Array<Point>} */
   tesselate() {
-    return [this.v0, this.v1, this.v2]; // Simple triangle for now
+     // Simple triangle for now
+    return [this.curves[0].points[0],
+            this.curves[1].points[0],
+            this.curves[2].points[0]];
   }
 }
 

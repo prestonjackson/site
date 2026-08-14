@@ -3,6 +3,7 @@
 
 import { Id } from "../util/id.js";
 import { Curve } from "../math/curve.js";
+import { Vertex } from "./vertex.js";
 
 /**
  * Edge - represents a connection between two vertices.
@@ -10,40 +11,37 @@ import { Curve } from "../math/curve.js";
 export class Edge {
   /** @type {Id} */
   #id;
+  /** @type {Array<Vertex>} */
+  #vertices;
   /** @type {Curve} */
   #curve;
 
   /**
    * Create an edge between two vertices.
-   * @param {Array<Id>} vertexIds
+   * @param {Array<Vertex>} vertices
    */
-  constructor(vertexIds) {
+  constructor(vertices) {
     this.#id = new Id();
-    this.#curve = new Curve(vertexIds);
+    this.#vertices = [...vertices];
+
+    const points = this.#vertices.map(vertex => vertex.point);
+    this.#curve = new Curve(points, []);
   }
 
   /**
    * Get the first vertex of this edge.
-   * @returns {Id}
+   * @returns {Vertex}
    */
   get v0() {
-    return this.#curve.v0;
-  }
-
-  set v0(id) {
-    this.#curve.v0 = id;
+    return this.#vertices[0];
   }
 
   /**
    * Get the second vertex of this edge.
-   * @returns {Id}
+   * @returns {Vertex}
    */
   get v1() {
-    return this.#curve.v1;
-  }
-
-  set v1(id) {
-    this.#curve.v1 = id;
+    return this.#vertices[1];
   }
 
   /**

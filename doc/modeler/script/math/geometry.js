@@ -1,20 +1,19 @@
 // @ts-check
 "use strict";
 
-import { Curve } from "../math/curve.js";
-import { Surface } from "../math/surface.js";
+import { Curve } from "./curve.js";
 import { Point } from "./point.js";
-import { Id } from "../util/id.js";
+import { Surface } from "./surface.js";
 
 /**
  * Geometry - Represents a structured set of vertices (points), edges (lines), and faces (polygons).
  */
 export class Geometry {
-  /** @type {Map<Id, Point>} */
+  /** @type {Map<number, Point>} */
   points;
-  /** @type {Map<Id, Curve>} */
+  /** @type {Map<number, Curve>} */
   curves;
-  /** @type {Map<Id, Surface>} */
+  /** @type {Map<number, Surface>} */
   surfaces;
 
   /** @type {number} */
@@ -24,10 +23,15 @@ export class Geometry {
   /** @type {number} */
   kTriangleStride = 3; // three point indices per triangle
 
-  constructor() {
-    this.points = new Map();
-    this.curves = new Map();
-    this.surfaces = new Map();
+  /**
+   * @param {Map<number, Point>} points
+   * @param {Map<number, Curve>} curves
+   * @param {Map<number, Surface>} surfaces
+   */
+  constructor(points = new Map(), curves = new Map(), surfaces = new Map()) {
+    this.points = points;
+    this.curves = curves;
+    this.surfaces = surfaces;
   }
 
   /**
@@ -35,14 +39,14 @@ export class Geometry {
    * @param {Geometry} other - The other geometry to union.
    */
   union(other) {
-    for (const [id, point] of other.points) {
-      this.points.set(id, point);
+    for (const [key, point] of other.points) {
+      this.points.set(key, point);
     }
-    for (const [id, curve] of other.curves) {
-      this.curves.set(id, curve);
+    for (const [key, curve] of other.curves) {
+      this.curves.set(key, curve);
     }
-    for (const [id, surface] of other.surfaces) {
-      this.surfaces.set(id, surface);
+    for (const [key, surface] of other.surfaces) {
+      this.surfaces.set(key, surface);
     }
   }
 
@@ -57,11 +61,16 @@ export class Geometry {
     // Create an array of point data, and a mapping from point IDs to their
     // indices in the array
     const pointData = new Float32Array(this.points.size * this.kPointStride);
-    const pointIdToIndexMap = new Map();
+    
+    // Map from a point references to a vertex-id (the key)
+    const pointRefToVertexIdMap = new Map();
+    // Map from the vertex-id to the an index in the point array
+    const vertexIdToPointIndexMap = new Map();
     let pointIndex = 0;
     for (const [id, point] of this.points) {
-      pointIdToIndexMap.set(id.toNumber(), pointIndex);
-      
+      pointRefToVertexIdMap.set(point, id);
+      vertexIdToPointIndexMap.set(id, pointIndex);
+
       const dataOffset = pointIndex * this.kPointStride;
       pointData[dataOffset] = point.x;
       pointData[dataOffset + 1] = point.y;
@@ -73,36 +82,42 @@ export class Geometry {
     const pointIndices = new Uint32Array(this.points.size);
     let i = 0;
     for (const [id, _] of this.points) {
-      pointIndices[i] = pointIdToIndexMap.get(id.toNumber());
+      pointIndices[i] = vertexIdToPointIndexMap.get(id);
       i++;
     }
 
     // Tesselate curves into lines.
-    const linePointIds = [];
+    const lineVertexIds = [];
     for (const [_, curve] of this.curves) {
-      const lines = curve.tesselate();
-      linePointIds.push(...lines);
+      const linePointRefs = curve.tesselate();
+      for (const pointRef of linePointRefs) {
+        // Look up the vertex ID for the point ref of the tesselated line.
+        const vertexId = pointRefToVertexIdMap.get(pointRef);
+        lineVertexIds.push(vertexId);
+      }
+    }
+    
+    // Pack triangle data into a flat array of indices.
+    const lineIndices = new Uint32Array(lineVertexIds.length);
+    for (let i = 0; i < lineVertexIds.length; i++) {
+      lineIndices[i] = vertexIdToPointIndexMap.get(lineVertexIds[i]);
     }
 
-    // Pack line data into a flat array of indices.
-    const lineIndices = new Uint32Array(linePointIds.length);
-    for (let i = 0; i < linePointIds.length; i++) {
-      const id = linePointIds[i];
-      lineIndices[i] = pointIdToIndexMap.get(id.toNumber());
-    }
-
-    // Tesselate surfaces into triangles.
-    const trianglePointIds = [];
+    // Tesselate surfaces into triangles and collect the vertex IDs..
+    const triangleVertexIds = [];
     for (const [_, surface] of this.surfaces) {
-      const triangles = surface.tesselate();
-      trianglePointIds.push(...triangles);
+      const surfacePointRefs = surface.tesselate();
+      for (const pointRef of surfacePointRefs) {
+        // Look up the vertex ID for the point ref of the tesselated surface.
+        const vertexId = pointRefToVertexIdMap.get(pointRef);
+        triangleVertexIds.push(vertexId);
+      }
     }
 
     // Pack triangle data into a flat array of indices.
-    const triangleIndices = new Uint32Array(trianglePointIds.length);
-    for (let i = 0; i < trianglePointIds.length; i++) {
-      const id = trianglePointIds[i];
-      triangleIndices[i] = pointIdToIndexMap.get(id.toNumber());
+    const triangleIndices = new Uint32Array(triangleVertexIds.length);
+    for (let i = 0; i < triangleVertexIds.length; i++) {
+      triangleIndices[i] = vertexIdToPointIndexMap.get(triangleVertexIds[i]);
     }
 
     return {
